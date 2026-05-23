@@ -2,11 +2,25 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import GlassCard from '../components/GlassCard';
-import { Clock, AlertTriangle, MessageSquare, CheckCircle, ArrowLeft, Activity } from 'lucide-react';
+import { Clock, AlertTriangle, MessageSquare, CheckCircle, ArrowLeft, Activity, Loader2 } from 'lucide-react';
+
+const careerNames = {
+  swe: "Software Engineer",
+  ai: "AI Engineer",
+  cyber: "Cybersecurity Analyst",
+  cloud: "Cloud Architect",
+  ux: "UI/UX Designer",
+  game: "Game Developer",
+  data: "Data Scientist"
+};
 
 const Simulation = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [events, setEvents] = useState([]);
   
   const [time, setTime] = useState('09:00 AM');
   const [stressLevel, setStressLevel] = useState(20);
@@ -14,23 +28,58 @@ const Simulation = () => {
   const [currentEvent, setCurrentEvent] = useState(0);
   const [notifications, setNotifications] = useState([]);
 
-  // Mock Day progression
-  const events = [
-    { time: '09:00 AM', title: 'Daily Standup', desc: 'Team is waiting for your update.', stressMod: +5, xpMod: +10, choices: ['Report normal progress', 'Mention a blocker you are facing'] },
-    { time: '11:30 AM', title: 'Code Review', desc: 'Senior dev left 15 comments on your PR.', stressMod: +20, xpMod: +30, choices: ['Fix them systematically', 'Argue about styling'] },
-    { time: '02:15 PM', title: 'Production Bug!', desc: 'Payment gateway is failing for 5% of users.', stressMod: +40, xpMod: +50, choices: ['Rollback deployment immediately', 'Debug the live logs'] },
-    { time: '05:00 PM', title: 'End of Day', desc: 'You survived the day.', stressMod: -30, xpMod: +100, choices: ['Log off', 'Work late'] }
-  ];
+  const careerName = careerNames[id] || id;
+
+  // Fetch dynamic simulation from Gemini API backend
+  useEffect(() => {
+    const fetchSimulation = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const apiBaseUrl = import.meta.env.VITE_API_URL || '';
+        const response = await fetch(`${apiBaseUrl}/api/simulation/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ career: careerName })
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to generate simulation. Make sure the backend is running.');
+        }
+        
+        const data = await response.json();
+        
+        if (!Array.isArray(data) || data.length === 0) {
+          throw new Error('Invalid simulation data received.');
+        }
+        
+        setEvents(data);
+        setTime(data[0].time);
+      } catch (err) {
+        console.error('Simulation generation error:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchSimulation();
+  }, [id, careerName]);
 
   const handleChoice = (choiceIndex) => {
     const event = events[currentEvent];
-    let newStress = stressLevel + event.stressMod;
-    if (choiceIndex === 1 && currentEvent === 2) newStress += 20; // Debugging live is stressful!
+    if (!event) return;
+
+    // Use choice-specific modifiers if they exist, otherwise fallback
+    const stressMod = choiceIndex === 0 ? event.stressMod : (event.stressModAlt !== undefined ? event.stressModAlt : event.stressMod);
+    const xpMod = choiceIndex === 0 ? event.xpMod : (event.xpModAlt !== undefined ? event.xpModAlt : event.xpMod);
+
+    let newStress = stressLevel + stressMod;
     if (newStress > 100) newStress = 100;
     if (newStress < 0) newStress = 0;
 
     setStressLevel(newStress);
-    setXp(xp + event.xpMod);
+    setXp(xp + xpMod);
 
     addNotification(`Action taken: ${event.choices[choiceIndex]}`);
 
@@ -54,13 +103,36 @@ const Simulation = () => {
     return 'bg-red-500 shadow-[0_0_10px_#ef4444] text-slate-800 animate-pulse';
   };
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <Loader2 className="w-16 h-16 text-blue-600 animate-spin mb-6" />
+        <h2 className="text-2xl font-bold text-slate-800 mb-2">Generating AI Simulation...</h2>
+        <p className="text-slate-500">Nova AI is crafting your customized simulation for {careerName}.</p>
+      </div>
+    );
+  }
+
+  if (error || events.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+        <AlertTriangle className="text-red-500 w-16 h-16 mb-4" />
+        <h2 className="text-2xl font-bold text-slate-800 mb-2">Simulation Generation Failed</h2>
+        <p className="text-slate-500 mb-6">{error || 'Could not fetch simulation data.'}</p>
+        <button onClick={() => navigate('/explorer')} className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-semibold">
+          Back to Explorer
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-[80vh]">
       <div className="flex items-center gap-4 mb-8">
         <button onClick={() => navigate('/explorer')} className="p-2 bg-slate-50 rounded-full hover:bg-slate-100 transition-colors">
           <ArrowLeft size={20} />
         </button>
-        <h1 className="text-3xl  font-bold capitalize">Simulating: <span className="neon-text">{id}</span></h1>
+        <h1 className="text-3xl font-bold capitalize">Simulating: <span className="neon-text">{careerName}</span></h1>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -95,7 +167,7 @@ const Simulation = () => {
                 <div className={`p-4 rounded-full mb-6 ${currentEvent === 2 ? 'bg-red-500/20 text-red-500' : 'bg-blue-50 text-primary'}`}>
                   {currentEvent === 2 ? <AlertTriangle size={48} /> : <CheckCircle size={48} />}
                 </div>
-                <h2 className="text-4xl  font-bold mb-4">{events[currentEvent].title}</h2>
+                <h2 className="text-4xl font-bold mb-4">{events[currentEvent].title}</h2>
                 <p className="text-xl text-slate-500 mb-12">{events[currentEvent].desc}</p>
 
                 <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
