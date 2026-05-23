@@ -3,16 +3,32 @@ import { motion, AnimatePresence } from 'framer-motion';
 import GlassCard from '../components/GlassCard';
 import StatBadge from '../components/StatBadge';
 import AnimatedSection from '../components/AnimatedSection';
-import { User, Zap, Star, Shield, Play, Flame, Edit2, X, UploadCloud } from 'lucide-react';
+import { 
+  User, Zap, Star, Shield, Play, Flame, Edit2, X, UploadCloud, 
+  Compass, BookOpen, Award, BarChart2, FileText, CheckCircle, Users, MessageSquare, Lock 
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+
+const ALL_BADGES = [
+  { id: "1", name: "First Explorer", desc: "Explored 1 career path", icon: <Compass size={20} />, color: "from-blue-400 to-blue-600" },
+  { id: "2", name: "Roadmap Starter", desc: "Started your first learning roadmap", icon: <BookOpen size={20} />, color: "from-purple-400 to-purple-600" },
+  { id: "3", name: "7-Day Streak", desc: "Maintained a 7-day learning streak", icon: <Flame size={20} />, color: "from-orange-400 to-orange-600" },
+  { id: "4", name: "Career Saver", desc: "Saved 5 careers of interest", icon: <Star size={20} />, color: "from-yellow-400 to-yellow-600" },
+  { id: "5", name: "Quiz Master", desc: "Answered a skill check quiz", icon: <Award size={20} />, color: "from-green-400 to-green-600" },
+  { id: "6", name: "Comparison King", desc: "Compared 3 different careers", icon: <BarChart2 size={20} />, color: "from-pink-400 to-pink-600" },
+  { id: "7", name: "Resume Ready", desc: "Uploaded resume for AI matching", icon: <FileText size={20} />, color: "from-teal-400 to-teal-600" },
+  { id: "8", name: "Path Finder", desc: "Completed all levels of a roadmap", icon: <CheckCircle size={20} />, color: "from-emerald-400 to-emerald-600" },
+  { id: "9", name: "Mentor Seeker", desc: "Booked a mentor consultation", icon: <Users size={20} />, color: "from-cyan-400 to-cyan-600" },
+  { id: "10", name: "Community Voice", desc: "Participated in QA discussions", icon: <MessageSquare size={20} />, color: "from-red-400 to-red-600" },
+];
 
 const UserDashboard = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
   const [userProfile, setUserProfile] = useState({
-    name: "Loading...",
-    title: "Please wait",
+    name: "Alex Pro",
+    title: "Future Architect",
     avatar: null,
     xp: 0,
     level: 1,
@@ -46,10 +62,10 @@ const UserDashboard = () => {
   }, []);
 
   const stats = {
-    level: userProfile.level,
-    xp: userProfile.xp,
-    nextLevel: userProfile.level * 500,
-    streak: userProfile.streak,
+    level: userProfile.level || 1,
+    xp: userProfile.xp || 0,
+    nextLevel: (userProfile.level || 1) * 500,
+    streak: userProfile.streak || 0,
   };
 
   const savedCareers = userProfile.savedCareers || [];
@@ -110,6 +126,15 @@ const UserDashboard = () => {
     setIsEditing(false);
   };
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <div className="w-12 h-12 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin mb-4" />
+        <h3 className="text-xl font-bold text-slate-800">Loading student profile...</h3>
+        <p className="text-xs text-slate-500 mt-1">Connecting to MongoDB Atlas</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto relative">
@@ -134,7 +159,7 @@ const UserDashboard = () => {
               >
                 <X size={24} />
               </button>
-              <h2 className="text-2xl  font-bold mb-6">Edit Profile</h2>
+              <h2 className="text-2xl font-bold mb-6 text-slate-800">Edit Profile</h2>
               
               <div className="flex flex-col gap-6">
                 <div className="flex flex-col items-center gap-4">
@@ -147,8 +172,8 @@ const UserDashboard = () => {
                       </div>
                     )}
                     <div className="absolute inset-0 bg-slate-900/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <UploadCloud size={20} className="text-primary mb-1" />
-                      <span className="text-xs text-slate-800">Upload</span>
+                      <UploadCloud size={20} className="text-white mb-1" />
+                      <span className="text-xs text-white">Upload</span>
                     </div>
                   </div>
                   <input 
@@ -222,7 +247,7 @@ const UserDashboard = () => {
                 
                 <button 
                   onClick={saveProfile}
-                  className="w-full py-3 mt-4 bg-blue-100 border border-primary text-primary font-bold rounded-lg hover:bg-blue-600 hover:text-slate-800 transition-colors"
+                  className="w-full py-3 mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors shadow-md"
                 >
                   Save Changes
                 </button>
@@ -233,8 +258,8 @@ const UserDashboard = () => {
       </AnimatePresence>
 
       <AnimatedSection className="flex flex-col md:flex-row gap-8 items-center md:items-start mb-12">
-        <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-blue-500 to-blue-700 p-1 shrink-0">
-          <div className="w-full h-full bg-white rounded-full flex items-center justify-center border-4 border-darkBg overflow-hidden">
+        <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 p-1 shrink-0 shadow-md">
+          <div className="w-full h-full bg-white rounded-full flex items-center justify-center border-4 border-slate-100 overflow-hidden">
             {userProfile.avatar ? (
               <img src={userProfile.avatar} alt="Profile" className="w-full h-full object-cover" />
             ) : (
@@ -244,23 +269,47 @@ const UserDashboard = () => {
         </div>
         <div className="flex-1 text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-4 mb-2">
-            <h1 className="text-4xl  font-bold">{userProfile.name}</h1>
+            <h1 className="text-4xl font-bold text-slate-900">{userProfile.name || "Alex Pro"}</h1>
             <button 
               onClick={() => {
                 setEditForm(userProfile);
                 setIsEditing(true);
               }} 
-              className="p-2 bg-slate-50 rounded-full text-slate-500 hover:text-primary hover:bg-slate-100 transition-colors"
+              className="p-2 bg-slate-100 rounded-full text-slate-500 hover:text-blue-600 hover:bg-slate-200 transition-all active:scale-90"
               title="Edit Profile"
             >
               <Edit2 size={16} />
             </button>
           </div>
-          <p className="text-primary mb-1">{userProfile.title} • Level {stats.level}</p>
-          <p className="text-slate-500 text-sm mb-4">
-            Stage: <strong className="text-slate-700">{userProfile.grade || 'Not Configured'}</strong> • 
-            Stream: <strong className="text-slate-700">{userProfile.stream || 'Not Configured'}</strong>
-          </p>
+          <p className="text-primary font-semibold mb-1">{userProfile.title || "Future Architect"} • Level {stats.level}</p>
+          
+          {(!userProfile.grade || !userProfile.stream) ? (
+            <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4 max-w-xl text-left">
+              <div>
+                <h4 className="text-sm font-bold text-amber-900 flex items-center gap-1.5">
+                  <Star size={16} className="text-amber-500 fill-amber-500" />
+                  Personalize Your Dashboard
+                </h4>
+                <p className="text-xs text-amber-700 mt-0.5 leading-relaxed">
+                  Configure your academic stage and stream interest to get custom roadmaps, package trackers, and matched courses.
+                </p>
+              </div>
+              <button 
+                onClick={() => {
+                  setEditForm(userProfile);
+                  setIsEditing(true);
+                }} 
+                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-md transition-all shrink-0 active:scale-95"
+              >
+                Complete Profile
+              </button>
+            </div>
+          ) : (
+            <p className="text-slate-500 text-sm mb-4">
+              Stage: <strong className="text-slate-700">{userProfile.grade}</strong> • 
+              Stream: <strong className="text-slate-700">{userProfile.stream === 'All' ? 'All / Deciding' : userProfile.stream}</strong>
+            </p>
+          )}
           
           <div className="flex flex-wrap justify-center md:justify-start gap-4">
             <StatBadge label="Total XP" value={stats.xp} icon={<Zap size={14} />} color="primary" />
@@ -274,7 +323,7 @@ const UserDashboard = () => {
             </div>
             <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
               <motion.div 
-                className="h-full bg-gradient-to-r from-blue-500 to-blue-700"
+                className="h-full bg-gradient-to-r from-blue-500 to-indigo-600"
                 initial={{ width: 0 }}
                 animate={{ width: `${(stats.xp / stats.nextLevel) * 100}%` }}
               />
@@ -283,44 +332,115 @@ const UserDashboard = () => {
         </div>
       </AnimatedSection>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <AnimatedSection delay={0.2}>
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><Star className="text-yellow-400" /> Saved Careers</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left 2 Columns: Saved Careers */}
+        <AnimatedSection delay={0.2} className="lg:col-span-2">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-slate-900">
+            <Star className="text-yellow-500 fill-yellow-500" /> 
+            Saved Learning Roadmaps
+          </h2>
           <div className="space-y-4">
-            {savedCareers.map((c, i) => (
-              <GlassCard key={i} className="flex flex-col gap-3">
-                <div className="flex justify-between items-center">
-                  <h3 className="font-bold text-lg">{c.title}</h3>
-                  <button onClick={() => navigate('/explorer')} className="text-primary hover:text-slate-800 transition-colors">
-                    <Play size={20} />
-                  </button>
-                </div>
-                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                  <motion.div 
-                    className="h-full bg-primary"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${c.progress}%` }}
-                  />
-                </div>
-                <div className="text-xs text-slate-500 text-right">{c.progress}% Simulated</div>
-              </GlassCard>
-            ))}
+            {savedCareers.length === 0 ? (
+              <div className="flex flex-col justify-center items-center text-center p-8 bg-slate-50 border border-dashed border-slate-200 rounded-2xl min-h-[220px]">
+                <Compass size={36} className="text-slate-400 mb-3 animate-pulse" />
+                <h4 className="text-sm font-bold text-slate-700">No Enrolled Roadmaps Yet</h4>
+                <p className="text-xs text-slate-500 mt-1 max-w-[280px] leading-relaxed mb-4">
+                  Browse and enroll in class-wise roadmaps to start tracking your syllabus and career preparation milestones.
+                </p>
+                <button
+                  onClick={() => navigate('/roadmap')}
+                  className="px-4.5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-1.5"
+                >
+                  Browse Roadmaps <ArrowRight size={14} />
+                </button>
+              </div>
+            ) : (
+              savedCareers.map((c, i) => (
+                <GlassCard key={i} className="flex flex-col gap-3 p-5 border-slate-200">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-bold text-lg text-slate-800">{c.title}</h3>
+                    <button 
+                      onClick={() => {
+                        const ids = {
+                          "AI Engineer": "ai",
+                          "Software Engineer": "swe",
+                          "Cloud Architect": "cloud",
+                          "UI/UX Designer": "ux",
+                          "Cybersecurity Analyst": "cyber",
+                          "Game Developer": "game",
+                          "Data Scientist": "data",
+                          "Foundations of Computer Science": "foundation-cs",
+                          "Financial Literacy & Banking": "foundation-finance",
+                          "Introduction to Visual Design": "foundation-design",
+                          "B.Tech Computer Science (JEE Prep)": "btech-cse",
+                          "Bachelor of Computer Applications (BCA)": "bca",
+                          "Bachelor of Design (B.Des / NID Prep)": "bdes"
+                        };
+                        const courseId = ids[c.title] || 'swe';
+                        navigate(`/career/${courseId}`);
+                      }} 
+                      className="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg transition-colors flex items-center gap-1 text-xs font-bold"
+                    >
+                      <Play size={12} fill="currentColor" /> Resume
+                    </button>
+                  </div>
+                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <motion.div 
+                      className="h-full bg-gradient-to-r from-blue-500 to-indigo-600"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${c.progress}%` }}
+                    />
+                  </div>
+                  <div className="text-xs text-slate-400 text-right font-medium">{c.progress}% Simulated</div>
+                </GlassCard>
+              ))
+            )}
           </div>
         </AnimatedSection>
 
+        {/* Right 1 Column: Badges */}
         <AnimatedSection delay={0.3}>
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><Shield className="text-secondary" /> Badges Earned</h2>
-          <div className="grid grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((b) => (
-              <div key={b} className="aspect-square rounded-2xl bg-slate-50 border border-slate-200 flex flex-col items-center justify-center p-2 hover:bg-slate-100 transition-colors cursor-pointer group">
-                <div className={`w-12 h-12 rounded-full mb-2 flex items-center justify-center ${b <= 3 ? 'bg-gradient-to-tr from-blue-500/20 to-blue-700/20 text-slate-800' : 'bg-slate-50 text-slate-400'}`}>
-                  <Zap size={24} className={b <= 3 ? 'text-primary' : ''} />
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2 text-slate-900">
+            <Shield className="text-indigo-600" /> 
+            Badges Grid
+          </h2>
+          <div className="grid grid-cols-2 gap-4">
+            {ALL_BADGES.map((badge) => {
+              const isUnlocked = userProfile.unlockedBadges?.includes(badge.id);
+              
+              return (
+                <div 
+                  key={badge.id} 
+                  className={`relative rounded-2xl border p-4 flex flex-col items-center text-center transition-all ${
+                    isUnlocked 
+                      ? 'bg-white border-slate-200 hover:shadow-md hover:-translate-y-0.5' 
+                      : 'bg-slate-50/50 border-slate-150 opacity-40 grayscale'
+                  }`}
+                  title={badge.desc}
+                >
+                  {/* Lock Indicator */}
+                  {!isUnlocked && (
+                    <div className="absolute top-2 right-2 text-slate-400">
+                      <Lock size={10} />
+                    </div>
+                  )}
+                  
+                  {/* Badge Icon */}
+                  <div className={`w-10 h-10 rounded-full mb-2 flex items-center justify-center bg-gradient-to-tr ${
+                    isUnlocked ? `${badge.color} text-white shadow-sm` : 'bg-slate-100 text-slate-400'
+                  }`}>
+                    {badge.icon}
+                  </div>
+                  
+                  <span className="text-[10px] font-bold text-slate-800 leading-tight block mb-0.5">
+                    {badge.name}
+                  </span>
+                  <span className="text-[8px] text-slate-400 font-semibold line-clamp-1">
+                    {badge.desc}
+                  </span>
                 </div>
-                <span className={`text-xs text-center font-medium ${b <= 3 ? 'text-slate-600' : 'text-slate-400'}`}>
-                  {b <= 3 ? 'Bug Squasher' : 'Locked'}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </AnimatedSection>
       </div>

@@ -5,7 +5,7 @@ import StatBadge from '../components/StatBadge';
 import AnimatedSection from '../components/AnimatedSection';
 import { 
   Search, Filter, ArrowRight, Brain, Code, Shield, Cloud, Palette, Gamepad2, Database,
-  UploadCloud, X, Sparkles, Loader2, BookOpen, GraduationCap 
+  UploadCloud, X, Sparkles, Loader2, BookOpen, GraduationCap, Cpu, Landmark, Brush, Monitor, Smartphone, Lock, Star 
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -30,16 +30,24 @@ const careers = [
   { id: 'data', title: "Data Scientist", category: "Data", salary: "₹9L - ₹28L LPA", stress: "Medium", aiRisk: "Medium", demand: "High", stream: "Science", cities: "Bengaluru, Mumbai, Gurgaon", recommendedStage: "College Student" },
 ];
 
-const getCategoryIcon = (category) => {
-  switch (category) {
-    case 'Foundation': return <BookOpen size={24} />;
-    case 'Degree': return <GraduationCap size={24} />;
-    case 'Engineering': return <Code size={24} />;
-    case 'Security': return <Shield size={24} />;
-    case 'Infrastructure': return <Cloud size={24} />;
-    case 'Design': return <Palette size={24} />;
-    case 'Data': return <Database size={24} />;
-    default: return <Sparkles size={24} />;
+const getCareerIcon = (id) => {
+  switch (id) {
+    case 'foundation-cs': return <Cpu className="text-blue-500" size={24} />;
+    case 'foundation-finance': return <Landmark className="text-amber-500" size={24} />;
+    case 'foundation-design': return <Brush className="text-pink-500" size={24} />;
+    
+    case 'btech-cse': return <Monitor className="text-blue-600" size={24} />;
+    case 'bca': return <Smartphone className="text-sky-500" size={24} />;
+    case 'bdes': return <Palette className="text-pink-650" size={24} />;
+    
+    case 'swe': return <Code className="text-blue-650" size={24} />;
+    case 'ai': return <Brain className="text-violet-600" size={24} />;
+    case 'cyber': return <Shield className="text-red-500" size={24} />;
+    case 'cloud': return <Cloud className="text-sky-500" size={24} />;
+    case 'ux': return <Palette className="text-pink-500" size={24} />;
+    case 'game': return <Gamepad2 className="text-green-500" size={24} />;
+    case 'data': return <Database className="text-amber-600" size={24} />;
+    default: return <Sparkles className="text-blue-500" size={24} />;
   }
 };
 
@@ -99,6 +107,34 @@ const CareerExplorer = () => {
     setSelectedStageFilter(stage);
     if (stage === 'Class 10') {
       setSelectedStreamFilter('All');
+    }
+  };
+
+  const handleSaveCareer = async (courseTitle, courseId) => {
+    try {
+      const apiBaseUrl = import.meta.env.VITE_API_URL || '';
+      const getRes = await fetch(`${apiBaseUrl}/api/profile`);
+      if (getRes.ok) {
+        const currentProfile = await getRes.json();
+        const currentSaved = currentProfile.savedCareers || [];
+        const exists = currentSaved.some(c => c.title === courseTitle);
+        if (!exists) {
+          const updatedSaved = [...currentSaved, { title: courseTitle, progress: 10 }];
+          const saveRes = await fetch(`${apiBaseUrl}/api/profile`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ savedCareers: updatedSaved })
+          });
+          if (saveRes.ok) {
+            alert(`"${courseTitle}" has been added to your dashboard!`);
+            setProfile(prev => ({ ...prev, savedCareers: updatedSaved }));
+          }
+        } else {
+          alert(`"${courseTitle}" is already saved in your dashboard.`);
+        }
+      }
+    } catch (err) {
+      console.error('Error saving career:', err);
     }
   };
 
@@ -242,61 +278,79 @@ const CareerExplorer = () => {
         </AnimatedSection>
       )}
 
-      {/* Unified Filters Section (Fixing the "stream two times" issue) */}
-      <AnimatedSection delay={0.1} className="flex flex-col gap-6 mb-12 relative z-20">
-        <div className="flex flex-col lg:flex-row gap-6 justify-between">
+      {/* Unified Filters Section */}
+      <AnimatedSection delay={0.1} className="flex flex-col gap-5 mb-12 relative z-20 bg-white/40 backdrop-blur-md p-6 rounded-3xl border border-slate-200 shadow-sm">
+        
+        {/* Row 1: Search and Category */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
           {/* Search bar */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={20} />
+          <div className="relative lg:col-span-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
             <input
               type="text"
               placeholder="Search courses or careers..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-full py-3.5 pl-12 pr-4 text-slate-800 focus:outline-none focus:border-primary focus:shadow-sm transition-all"
+              className="w-full bg-white border border-slate-200 rounded-full py-3 pl-11 pr-4 text-sm text-slate-800 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)] transition-all"
             />
           </div>
           
-          {/* Stage Filter Row */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            <span className="text-xs font-bold text-slate-400 uppercase mr-2 whitespace-nowrap">Academic Stage:</span>
-            {stages.map(st => (
+          {/* Category Filter Row */}
+          <div className="lg:col-span-2 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            <span className="text-xs font-bold text-slate-400 uppercase mr-2 whitespace-nowrap shrink-0">Category:</span>
+            {categories.map(cat => (
               <button
-                key={st}
-                onClick={() => handleStageSelect(st)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border ${selectedStageFilter === st ? 'bg-blue-100 border-blue-500 text-blue-800' : 'bg-transparent border-slate-200 text-slate-500 hover:text-slate-800'}`}
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border shrink-0 ${
+                  selectedCategory === cat 
+                    ? 'bg-violet-100 border-violet-400 text-violet-850 shadow-sm' 
+                    : 'bg-white border-slate-200 text-slate-500 hover:text-slate-800'
+                }`}
               >
-                {st}
+                {cat}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-6 justify-between border-t border-slate-200 pt-4">
-          {/* Stream Filter Row */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            <span className="text-xs font-bold text-slate-400 uppercase mr-2 whitespace-nowrap">Stream Interest:</span>
-            {streams.map(str => (
+        {/* Divider */}
+        <div className="h-[1px] bg-slate-200/60" />
+
+        {/* Row 2: Stage & Stream Filters */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Stage Filter Row */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            <span className="text-xs font-bold text-slate-400 uppercase mr-2 whitespace-nowrap shrink-0">Academic Stage:</span>
+            {stages.map(st => (
               <button
-                key={str}
-                onClick={() => setSelectedStreamFilter(str)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border ${selectedStreamFilter === str ? 'bg-indigo-100 border-indigo-500 text-indigo-800' : 'bg-transparent border-slate-200 text-slate-500 hover:text-slate-800'}`}
+                key={st}
+                onClick={() => handleStageSelect(st)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border shrink-0 ${
+                  selectedStageFilter === st 
+                    ? 'bg-blue-100 border-blue-400 text-blue-800 shadow-sm' 
+                    : 'bg-white border-slate-200 text-slate-500 hover:text-slate-800'
+                }`}
               >
-                {str}
+                {st}
               </button>
             ))}
           </div>
 
-          {/* Category Filter Row */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 font-medium">
-            <span className="text-xs font-bold text-slate-400 uppercase mr-2 whitespace-nowrap">Category:</span>
-            {categories.map(cat => (
+          {/* Stream Filter Row */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            <span className="text-xs font-bold text-slate-400 uppercase mr-2 whitespace-nowrap shrink-0">Stream Interest:</span>
+            {streams.map(str => (
               <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border ${selectedCategory === cat ? 'bg-violet-100 border-violet-500 text-violet-800' : 'bg-transparent border-slate-200 text-slate-500 hover:text-slate-800'}`}
+                key={str}
+                onClick={() => setSelectedStreamFilter(str)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border shrink-0 ${
+                  selectedStreamFilter === str 
+                    ? 'bg-indigo-100 border-indigo-400 text-indigo-850 shadow-sm' 
+                    : 'bg-white border-slate-200 text-slate-500 hover:text-slate-800'
+                }`}
               >
-                {cat}
+                {str}
               </button>
             ))}
           </div>
@@ -308,14 +362,14 @@ const CareerExplorer = () => {
         {filteredCareers.map((career, i) => {
           const matchScore = resumeMatchScores ? resumeMatchScores[career.id] : null;
           const isCompatible = !profile?.stream || profile.stream === 'All' || career.stream === profile.stream;
-          const isStageMatch = !profile?.grade || profile.grade === 'All' || career.recommendedStage === profile.grade;
+          const isSaved = profile?.savedCareers?.some(c => c.title === career.title);
           
           return (
             <AnimatedSection key={career.id} delay={0.08 * i}>
-              <GlassCard className="h-full flex flex-col cursor-pointer group" onClick={() => navigate(`/career/${career.id}`)}>
+              <GlassCard className="h-full flex flex-col cursor-pointer group hover:shadow-lg transition-all" onClick={() => navigate(`/career/${career.id}`)}>
                 <div className="flex justify-between items-start mb-6">
-                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-primary group-hover:bg-blue-50 transition-colors">
-                    {getCategoryIcon(career.category)}
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-primary group-hover:bg-blue-50 transition-colors shadow-sm">
+                    {getCareerIcon(career.id)}
                   </div>
                   
                   <div className="flex flex-col items-end gap-1.5">
@@ -327,13 +381,13 @@ const CareerExplorer = () => {
                           {matchScore}% Match
                         </span>
                       )}
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 uppercase tracking-wide">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 uppercase tracking-wide border border-blue-100 shadow-sm">
                         {career.recommendedStage}
                       </span>
                     </div>
                     {/* Stream Compatibility */}
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                      isCompatible ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'
+                      isCompatible ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-amber-50 text-amber-600 border border-amber-100'
                     }`}>
                       {career.stream} Stream
                     </span>
@@ -356,10 +410,34 @@ const CareerExplorer = () => {
                     <span className="text-slate-500">Automation Risk</span>
                     <span className="font-bold text-secondary">{career.aiRisk}</span>
                   </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-slate-500">Job Demand Trend</span>
+                    <span className={`font-bold ${
+                      career.demand === 'Very High' || career.demand === 'High' ? 'text-indigo-600' : 'text-slate-600'
+                    }`}>{career.demand}</span>
+                  </div>
                 </div>
 
-                <div className="mt-auto pt-6 border-t border-slate-200 flex items-center justify-between text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                  View Course Roadmap <ArrowRight size={18} />
+                <div className="mt-auto pt-6 border-t border-slate-200 flex items-center justify-between gap-4">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSaveCareer(career.title, career.id);
+                    }}
+                    disabled={isSaved}
+                    className={`text-xs font-bold px-3.5 py-2.5 rounded-xl transition-all flex items-center gap-1 cursor-pointer active:scale-95 shadow-sm ${
+                      isSaved 
+                        ? 'bg-slate-100 text-slate-400 border border-slate-150 cursor-not-allowed' 
+                        : 'bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 text-slate-600 hover:text-indigo-600'
+                    }`}
+                  >
+                    <Star size={13} className={isSaved ? 'fill-slate-400' : 'fill-slate-50 hover:fill-indigo-500'} /> 
+                    {isSaved ? 'Saved' : 'Save Path'}
+                  </button>
+                  
+                  <span className="text-xs text-blue-650 hover:text-blue-800 font-bold flex items-center gap-1 group-hover:translate-x-1 duration-200">
+                    View Roadmap <ArrowRight size={14} />
+                  </span>
                 </div>
               </GlassCard>
             </AnimatedSection>
