@@ -126,11 +126,13 @@ const AIMentor = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/chat', {
+      const apiBaseUrl = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${apiBaseUrl}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userText })
       });
+
       const data = await response.json();
       const reply = data.response || "Sorry, I couldn't generate a response.";
       setMessages(prev => [...prev, { role: 'ai', text: reply }]);
