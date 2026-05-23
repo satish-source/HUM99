@@ -1,6 +1,10 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowLeft, CheckCircle2, Circle, Lock, Briefcase, TrendingUp, DollarSign, Clock, ChevronRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  ArrowLeft, CheckCircle2, Circle, Lock, Briefcase, TrendingUp, DollarSign, Clock, 
+  ChevronRight, X, Sparkles, Loader2, AlertCircle 
+} from 'lucide-react';
 import GlassCard from '../components/GlassCard';
 
 const roadmapData = {
@@ -189,6 +193,17 @@ const CareerRoadmap = () => {
   const navigate = useNavigate();
   const data = roadmapData[id];
 
+  // Quiz States
+  const [activeSkill, setActiveSkill] = useState(null);
+  const [showQuizModal, setShowQuizModal] = useState(false);
+  const [quizQuestions, setQuizQuestions] = useState([]);
+  const [quizLoading, setQuizLoading] = useState(false);
+  const [currentQuizQuestion, setCurrentQuizQuestion] = useState(0);
+  const [quizScore, setQuizScore] = useState(0);
+  const [quizState, setQuizState] = useState('quiz'); // 'quiz', 'success', 'fail'
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [isAnswered, setIsAnswered] = useState(false);
+
   if (!data) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
@@ -198,10 +213,216 @@ const CareerRoadmap = () => {
     );
   }
 
+  const handleStartQuiz = async (skill) => {
+    setActiveSkill(skill);
+    setShowQuizModal(true);
+    setQuizLoading(true);
+    setQuizState('quiz');
+    setCurrentQuizQuestion(0);
+    setQuizScore(0);
+    setSelectedAnswer(null);
+    setIsAnswered(false);
+    
+    try {
+      const apiBaseUrl = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${apiBaseUrl}/api/quiz/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ skill })
+      });
+      if (response.ok) {
+        const quizData = await response.json();
+        setQuizQuestions(quizData);
+      } else {
+        alert("Failed to load quiz. Make sure the backend is running.");
+        setShowQuizModal(false);
+      }
+    } catch (err) {
+      console.error('Quiz fetch error:', err);
+      alert("Error generating quiz.");
+      setShowQuizModal(false);
+    } finally {
+      setQuizLoading(false);
+    }
+  };
+
+  const handleAnswerSubmit = (optionIndex) => {
+    if (isAnswered) return;
+    setSelectedAnswer(optionIndex);
+    setIsAnswered(true);
+    
+    const correctIndex = quizQuestions[currentQuizQuestion].answer;
+    if (optionIndex === correctIndex) {
+      setQuizScore(prev => prev + 1);
+    }
+  };
+
+  const handleNextQuestion = () => {
+    setIsAnswered(false);
+    setSelectedAnswer(null);
+    
+    if (currentQuizQuestion < quizQuestions.length - 1) {
+      setCurrentQuizQuestion(prev => prev + 1);
+    } else {
+      // Final grading
+      const finalScore = quizScore;
+      if (finalScore >= 2) {
+        setQuizState('success');
+        handleAwardXP(100);
+      } else {
+        setQuizState('fail');
+      }
+    }
+  };
+
+  const handleAwardXP = async (amount) => {
+    try {
+      const apiBaseUrl = import.meta.env.VITE_API_URL || '';
+      const getRes = await fetch(`${apiBaseUrl}/api/profile`);
+      if (getRes.ok) {
+        const profile = await getRes.json();
+        let newXp = (profile.xp || 0) + amount;
+        let newLevel = profile.level || 1;
+        const nextLevelThreshold = newLevel * 500;
+        
+        if (newXp >= nextLevelThreshold) {
+          newXp -= nextLevelThreshold;
+          newLevel += 1;
+        }
+        
+        await fetch(`${apiBaseUrl}/api/profile`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ xp: newXp, level: newLevel })
+        });
+      }
+    } catch (err) {
+      console.error('Error awarding XP:', err);
+    }
+  };
+
   const c = colorMap[data.color];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 py-8 relative">
+      {/* Quiz Modal */}
+      <AnimatePresence>
+        {showQuizModal && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              className="bg-white border border-slate-200 rounded-2xl p-8 max-w-lg w-full relative shadow-2xl"
+            >
+              <button 
+                onClick={() => setShowQuizModal(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-colors"
+              >
+                <X size={24} />
+              </button>
+              
+              {quizLoading ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
+                  <h3 className="text-xl font-bold text-slate-800">Generating AI Quiz...</h3>
+                  <p className="text-sm text-slate-500">Preparing questions for "{activeSkill}"</p>
+                </div>
+              ) : quizState === 'quiz' && quizQuestions.length > 0 ? (
+                <div>
+                  <div className="flex justify-between items-center mb-6">
+                    <span className="text-xs font-bold text-blue-600 uppercase tracking-wide">AI Skill Test: {activeSkill}</span>
+                    <span className="text-xs text-slate-400 font-mono">Q: {currentQuizQuestion + 1} / {quizQuestions.length}</span>
+                  </div>
+                  
+                  <h3 className="text-xl font-bold text-slate-800 mb-6">{quizQuestions[currentQuizQuestion].question}</h3>
+                  
+                  <div className="flex flex-col gap-3">
+                    {quizQuestions[currentQuizQuestion].options.map((option, idx) => {
+                      let btnStyle = "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100";
+                      if (isAnswered) {
+                        const correctIndex = quizQuestions[currentQuizQuestion].answer;
+                        if (idx === correctIndex) {
+                          btnStyle = "border-green-300 bg-green-50 text-green-700 font-semibold";
+                        } else if (idx === selectedAnswer) {
+                          btnStyle = "border-red-300 bg-red-50 text-red-700";
+                        } else {
+                          btnStyle = "border-slate-200 bg-slate-50/50 text-slate-400 opacity-60";
+                        }
+                      }
+                      
+                      return (
+                        <button
+                          key={idx}
+                          disabled={isAnswered}
+                          onClick={() => handleAnswerSubmit(idx)}
+                          className={`w-full py-3.5 px-5 rounded-xl border text-left text-sm transition-all ${btnStyle}`}
+                        >
+                          {option}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  
+                  {isAnswered && (
+                    <button
+                      onClick={handleNextQuestion}
+                      className="mt-6 w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-md"
+                    >
+                      {currentQuizQuestion < quizQuestions.length - 1 ? 'Next Question' : 'Finish Quiz'}
+                    </button>
+                  )}
+                </div>
+              ) : quizState === 'success' ? (
+                <div className="text-center py-8">
+                  <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4 animate-bounce" />
+                  <h3 className="text-2xl font-bold text-slate-800 mb-2">Quiz Passed! 🎉</h3>
+                  <p className="text-slate-500 mb-6">
+                    Awesome job! You answered the questions correctly and verified your understanding of **{activeSkill}**.
+                  </p>
+                  <div className="bg-green-50 border border-green-200 text-green-700 py-3 rounded-xl font-bold mb-6">
+                    +100 XP Awarded
+                  </div>
+                  <button
+                    onClick={() => setShowQuizModal(false)}
+                    className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl"
+                  >
+                    Continue Journey
+                  </button>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                  <h3 className="text-2xl font-bold text-slate-800 mb-2">Quiz Failed</h3>
+                  <p className="text-slate-500 mb-6">
+                    You got {quizScore} out of 3 questions correct. You need at least 2 correct answers to pass the skill check.
+                  </p>
+                  <div className="flex gap-4 justify-center">
+                    <button
+                      onClick={() => handleStartQuiz(activeSkill)}
+                      className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl"
+                    >
+                      Retry Quiz
+                    </button>
+                    <button
+                      onClick={() => setShowQuizModal(false)}
+                      className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl border border-slate-200"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Back button */}
       <button
         onClick={() => navigate('/explorer')}
@@ -270,9 +491,15 @@ const CareerRoadmap = () => {
                     {/* Skills */}
                     <div className="flex flex-wrap gap-2">
                       {stage.skills.map(skill => (
-                        <span key={skill} className="text-xs bg-slate-100 border border-slate-200 text-slate-600 px-2.5 py-1 rounded-full">
+                        <button
+                          key={skill}
+                          onClick={() => handleStartQuiz(skill)}
+                          className="text-xs bg-slate-50 hover:bg-blue-100 hover:text-blue-700 hover:border-blue-300 border border-slate-200 text-slate-600 px-3 py-1.5 rounded-full transition-all cursor-pointer flex items-center gap-1.5 font-medium active:scale-95"
+                          title="Click to take an AI Skill Test!"
+                        >
+                          <Sparkles size={11} className="text-blue-500 animate-pulse" />
                           {skill}
-                        </span>
+                        </button>
                       ))}
                     </div>
                   </div>

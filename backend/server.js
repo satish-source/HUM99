@@ -37,6 +37,30 @@ const dataSchema = new mongoose.Schema({
 });
 const Data = mongoose.model('Data', dataSchema);
 
+const profileSchema = new mongoose.Schema({
+  name: { type: String, default: "Alex Pro" },
+  title: { type: String, default: "Future Architect" },
+  avatar: { type: String, default: null },
+  xp: { type: Number, default: 4500 },
+  level: { type: Number, default: 14 },
+  streak: { type: Number, default: 12 },
+  savedCareers: { 
+    type: [
+      {
+        title: String,
+        progress: Number
+      }
+    ],
+    default: [
+      { title: "AI Engineer", progress: 80 },
+      { title: "Cloud Architect", progress: 45 }
+    ]
+  },
+  unlockedBadges: { type: [String], default: ["1", "2", "3"] }
+});
+const Profile = mongoose.model('Profile', profileSchema);
+
+
 // Basic route
 app.get('/', (req, res) => {
   res.send('Hello from HUM99 Backend!');
@@ -158,6 +182,136 @@ app.post('/api/simulation/generate', async (req, res) => {
     res.json(responseJson);
   } catch (err) {
     console.error('Simulation generation error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get User Profile
+app.get('/api/profile', async (req, res) => {
+  try {
+    let profile = await Profile.findOne();
+    if (!profile) {
+      profile = new Profile();
+      await profile.save();
+    }
+    res.json(profile);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Update User Profile
+app.post('/api/profile', async (req, res) => {
+  try {
+    let profile = await Profile.findOne();
+    if (!profile) {
+      profile = new Profile(req.body);
+    } else {
+      Object.assign(profile, req.body);
+    }
+    await profile.save();
+    res.json(profile);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// AI Resume Matcher endpoint
+app.post('/api/resume/match', async (req, res) => {
+  try {
+    const { resumeText } = req.body;
+    
+    if (!resumeText || resumeText.trim() === '') {
+      return res.status(400).json({ error: 'Resume text is required.' });
+    }
+
+    const prompt = `You are a career matcher. Analyze the following candidate's resume and calculate match scores (from 0 to 100) for these 7 careers:
+    - swe (Software Engineer)
+    - ai (AI Engineer)
+    - cyber (Cybersecurity)
+    - cloud (Cloud Architect)
+    - ux (UI/UX Designer)
+    - game (Game Developer)
+    - data (Data Scientist)
+
+    Candidate Resume:
+    "${resumeText}"
+
+    Also, identify the career path with the highest score, and list exactly 3 critical missing skills or technologies they should learn to be fully competitive for that top career.
+    
+    Return ONLY a raw JSON object. No markdown wrappers, no descriptions. Example format:
+    {
+      "scores": {
+        "swe": 75,
+        "ai": 60,
+        "cyber": 45,
+        "cloud": 50,
+        "ux": 30,
+        "game": 40,
+        "data": 55
+      },
+      "topCareer": "swe",
+      "missingSkills": ["Docker & Kubernetes", "System Design", "AWS Services"]
+    }`;
+
+    if (aiModel) {
+      try {
+        const geminiResponse = await aiModel.generateContent(prompt);
+        let rawText = geminiResponse.response.text();
+        rawText = rawText.replace(/```json|```/g, '').trim();
+        const responseJson = JSON.parse(rawText);
+        res.json(responseJson);
+      } catch (geminiErr) {
+        console.error('Gemini Resume Matcher Error:', geminiErr.message);
+        throw new Error('Failed to match resume via Gemini: ' + geminiErr.message);
+      }
+    } else {
+      throw new Error('AI Model is not initialized.');
+    }
+  } catch (err) {
+    console.error('Resume matching error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// AI Skill Quiz Generator endpoint
+app.post('/api/quiz/generate', async (req, res) => {
+  try {
+    const { skill } = req.body;
+    
+    if (!skill || skill.trim() === '') {
+      return res.status(400).json({ error: 'Skill name is required.' });
+    }
+
+    const prompt = `You are an educational tutor. Generate a 3-question multiple-choice quiz to test the user's knowledge on the skill/technology: "${skill}".
+    Each question must have 4 options and exactly one correct answer (indicated by the 0-indexed integer of the correct option).
+    The questions should be appropriate for an IT professional or software student.
+
+    Return ONLY a raw JSON array of 3 objects. No markdown wrappers, no extra notes. Example format:
+    [
+      {
+        "question": "What is the primary command to stage all files in Git?",
+        "options": ["git commit", "git push", "git add .", "git init"],
+        "answer": 2
+      }
+    ]`;
+
+    if (aiModel) {
+      try {
+        const geminiResponse = await aiModel.generateContent(prompt);
+        let rawText = geminiResponse.response.text();
+        rawText = rawText.replace(/```json|```/g, '').trim();
+        const responseJson = JSON.parse(rawText);
+        res.json(responseJson);
+      } catch (geminiErr) {
+        console.error('Gemini Quiz Generator Error:', geminiErr.message);
+        throw new Error('Failed to generate quiz via Gemini: ' + geminiErr.message);
+      }
+    } else {
+      throw new Error('AI Model is not initialized.');
+    }
+  } catch (err) {
+    console.error('Quiz generation error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });

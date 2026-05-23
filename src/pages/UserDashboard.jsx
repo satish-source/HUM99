@@ -10,39 +10,49 @@ const UserDashboard = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
-  // Load from local storage or use defaults
-  const [userProfile, setUserProfile] = useState(() => {
-    const saved = localStorage.getItem('careerverse_user');
-    return saved ? JSON.parse(saved) : {
-      name: "Alex Pro",
-      title: "Future Architect",
-      avatar: null // Will store base64 image
-    };
+  const [userProfile, setUserProfile] = useState({
+    name: "Loading...",
+    title: "Please wait",
+    avatar: null,
+    xp: 0,
+    level: 1,
+    streak: 0,
+    savedCareers: [],
+    unlockedBadges: []
   });
 
+  const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState(userProfile);
 
+  // Fetch profile from backend MongoDB
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const apiBaseUrl = import.meta.env.VITE_API_URL || '';
+        const response = await fetch(`${apiBaseUrl}/api/profile`);
+        if (response.ok) {
+          const data = await response.json();
+          setUserProfile(data);
+          setEditForm(data);
+        }
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
   const stats = {
-    level: 14,
-    xp: 4500,
-    nextLevel: 5000,
-    streak: 12,
+    level: userProfile.level,
+    xp: userProfile.xp,
+    nextLevel: userProfile.level * 500,
+    streak: userProfile.streak,
   };
 
-  const savedCareers = [
-    { title: "AI Engineer", progress: 80 },
-    { title: "Cloud Architect", progress: 45 },
-  ];
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('careerverse_user', JSON.stringify(userProfile));
-    } catch (e) {
-      console.error("Storage error:", e);
-      alert("Failed to save profile. The image might be too large.");
-    }
-  }, [userProfile]);
+  const savedCareers = userProfile.savedCareers || [];
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -52,7 +62,6 @@ const UserDashboard = () => {
     reader.onload = (event) => {
       const img = new Image();
       img.onload = () => {
-        // Compress image using canvas to avoid localStorage limits
         const canvas = document.createElement('canvas');
         const MAX_WIDTH = 300;
         const MAX_HEIGHT = 300;
@@ -83,10 +92,24 @@ const UserDashboard = () => {
     reader.readAsDataURL(file);
   };
 
-  const saveProfile = () => {
-    setUserProfile(editForm);
+  const saveProfile = async () => {
+    try {
+      const apiBaseUrl = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${apiBaseUrl}/api/profile`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm)
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUserProfile(data);
+      }
+    } catch (err) {
+      console.error('Error saving profile:', err);
+    }
     setIsEditing(false);
   };
+
 
   return (
     <div className="max-w-5xl mx-auto relative">
