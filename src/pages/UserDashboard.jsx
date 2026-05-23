@@ -178,6 +178,32 @@ const UserDashboard = () => {
                     className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-slate-800 focus:outline-none focus:border-primary"
                   />
                 </div>
+                <div>
+                  <label className="block text-sm text-slate-500 mb-2">Academic Stage</label>
+                  <select 
+                    value={editForm.grade || ''}
+                    onChange={(e) => setEditForm({...editForm, grade: e.target.value})}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-slate-800 focus:outline-none focus:border-primary font-medium"
+                  >
+                    <option value="">Select Stage</option>
+                    <option value="Class 10">Class 10 (Deciding Stream)</option>
+                    <option value="Class 12">Class 12 (Preparing for College)</option>
+                    <option value="College Student">College Student / Graduate</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm text-slate-500 mb-2">Stream Interest</label>
+                  <select 
+                    value={editForm.stream || ''}
+                    onChange={(e) => setEditForm({...editForm, stream: e.target.value})}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-slate-800 focus:outline-none focus:border-primary font-medium"
+                  >
+                    <option value="">Select Stream</option>
+                    <option value="Science">Science (PCM / PCB)</option>
+                    <option value="Commerce">Commerce</option>
+                    <option value="Arts & Design">Arts & Design</option>
+                  </select>
+                </div>
                 
                 <button 
                   onClick={saveProfile}
@@ -215,7 +241,11 @@ const UserDashboard = () => {
               <Edit2 size={16} />
             </button>
           </div>
-          <p className="text-primary mb-4">{userProfile.title} • Level {stats.level}</p>
+          <p className="text-primary mb-1">{userProfile.title} • Level {stats.level}</p>
+          <p className="text-slate-500 text-sm mb-4">
+            Stage: <strong className="text-slate-700">{userProfile.grade || 'Not Configured'}</strong> • 
+            Stream: <strong className="text-slate-700">{userProfile.stream || 'Not Configured'}</strong>
+          </p>
           
           <div className="flex flex-wrap justify-center md:justify-start gap-4">
             <StatBadge label="Total XP" value={stats.xp} icon={<Zap size={14} />} color="primary" />

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GlassCard from '../components/GlassCard';
 import StatBadge from '../components/StatBadge';
@@ -10,13 +10,13 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 const careers = [
-  { id: 'swe', title: "Software Engineer", category: "Engineering", icon: <Code />, salary: "$120k", stress: "High", aiRisk: "Low", demand: "High" },
-  { id: 'ai', title: "AI Engineer", category: "Engineering", icon: <Brain />, salary: "$160k", stress: "High", aiRisk: "Very Low", demand: "Very High" },
-  { id: 'cyber', title: "Cybersecurity", category: "Security", icon: <Shield />, salary: "$130k", stress: "Extreme", aiRisk: "Low", demand: "High" },
-  { id: 'cloud', title: "Cloud Architect", category: "Infrastructure", icon: <Cloud />, salary: "$150k", stress: "Medium", aiRisk: "Low", demand: "High" },
-  { id: 'ux', title: "UI/UX Designer", category: "Design", icon: <Palette />, salary: "$105k", stress: "Medium", aiRisk: "Medium", demand: "Medium" },
-  { id: 'game', title: "Game Developer", category: "Engineering", icon: <Gamepad2 />, salary: "$95k", stress: "High", aiRisk: "Medium", demand: "Medium" },
-  { id: 'data', title: "Data Scientist", category: "Data", icon: <Database />, salary: "$140k", stress: "Medium", aiRisk: "Medium", demand: "High" },
+  { id: 'swe', title: "Software Engineer", category: "Engineering", icon: <Code />, salary: "₹8L - ₹25L LPA", stress: "High", aiRisk: "Low", demand: "High", stream: "Science", cities: "Bengaluru, Pune, Hyderabad" },
+  { id: 'ai', title: "AI Engineer", category: "Engineering", icon: <Brain />, salary: "₹12L - ₹38L LPA", stress: "High", aiRisk: "Very Low", demand: "Very High", stream: "Science", cities: "Bengaluru, Delhi NCR, Mumbai" },
+  { id: 'cyber', title: "Cybersecurity Analyst", category: "Security", icon: <Shield />, salary: "₹7L - ₹22L LPA", stress: "Extreme", aiRisk: "Low", demand: "High", stream: "Science", cities: "Bengaluru, Mumbai, Chennai" },
+  { id: 'cloud', title: "Cloud Architect", category: "Infrastructure", icon: <Cloud />, salary: "₹10L - ₹30L LPA", stress: "Medium", aiRisk: "Low", demand: "High", stream: "Science", cities: "Bengaluru, Hyderabad, Pune" },
+  { id: 'ux', title: "UI/UX Designer", category: "Design", icon: <Palette />, salary: "₹6L - ₹18L LPA", stress: "Medium", aiRisk: "Medium", demand: "Medium", stream: "Arts & Design", cities: "Mumbai, Bengaluru, Delhi NCR" },
+  { id: 'game', title: "Game Developer", category: "Engineering", icon: <Gamepad2 />, salary: "₹5L - ₹16L LPA", stress: "High", aiRisk: "Medium", demand: "Medium", stream: "Science", cities: "Bengaluru, Hyderabad, Pune" },
+  { id: 'data', title: "Data Scientist", category: "Data", icon: <Database />, salary: "₹9L - ₹28L LPA", stress: "Medium", aiRisk: "Medium", demand: "High", stream: "Science", cities: "Bengaluru, Mumbai, Gurgaon" },
 ];
 
 const CareerExplorer = () => {
@@ -31,12 +31,37 @@ const CareerExplorer = () => {
   const [resumeMatchScores, setResumeMatchScores] = useState(null);
   const [missingSkills, setMissingSkills] = useState(null);
 
+  // User Profile for Personalization
+  const [profile, setProfile] = useState(null);
+  const [selectedStreamFilter, setSelectedStreamFilter] = useState('All');
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const apiBaseUrl = import.meta.env.VITE_API_URL || '';
+        const response = await fetch(`${apiBaseUrl}/api/profile`);
+        if (response.ok) {
+          const data = await response.json();
+          setProfile(data);
+          if (data.stream) {
+            setSelectedStreamFilter(data.stream);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+      }
+    };
+    fetchProfile();
+  }, []);
+
   const categories = ['All', ...new Set(careers.map(c => c.category))];
+  const streams = ['All', 'Science', 'Commerce', 'Arts & Design'];
 
   const filteredCareers = careers.filter(c => {
     const matchesSearch = c.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || c.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesStream = selectedStreamFilter === 'All' || c.stream === selectedStreamFilter;
+    return matchesSearch && matchesCategory && matchesStream;
   });
 
   const handleScanResume = async (e) => {
@@ -148,6 +173,16 @@ const CareerExplorer = () => {
         </button>
       </AnimatedSection>
 
+      {/* Personalized Greeting banner based on Stream */}
+      {profile && profile.stream && (
+        <AnimatedSection className="mb-6">
+          <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-sm text-blue-800 flex items-center gap-2">
+            <Sparkles size={16} className="text-blue-600 animate-pulse" />
+            <span>Currently filtering recommendations for your saved stream: <strong>{profile.stream}</strong>. Select "All" below to see other streams.</span>
+          </div>
+        </AnimatedSection>
+      )}
+
       {/* AI Recommendation Box */}
       {missingSkills && (
         <AnimatedSection className="w-full mb-8">
@@ -173,23 +208,42 @@ const CareerExplorer = () => {
 
       {/* Filters and Search */}
       <AnimatedSection delay={0.1} className="flex flex-col md:flex-row justify-between gap-6 mb-12 relative z-20">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={20} />
-          <input
-            type="text"
-            placeholder="Search careers..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-full py-3 pl-12 pr-4 text-slate-800 focus:outline-none focus:border-primary focus:shadow-sm transition-all"
-          />
+        <div className="flex flex-col md:flex-row gap-4 flex-1">
+          {/* Search bar */}
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={20} />
+            <input
+              type="text"
+              placeholder="Search careers..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-full py-3 pl-12 pr-4 text-slate-800 focus:outline-none focus:border-primary focus:shadow-sm transition-all"
+            />
+          </div>
+          
+          {/* Stream selection filter */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
+            <span className="text-xs font-bold text-slate-400 uppercase mr-2">Stream:</span>
+            {streams.map(str => (
+              <button
+                key={str}
+                onClick={() => setSelectedStreamFilter(str)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border ${selectedStreamFilter === str ? 'bg-indigo-100 border-indigo-500 text-indigo-800' : 'bg-transparent border-slate-200 text-slate-500 hover:text-slate-800'}`}
+              >
+                {str}
+              </button>
+            ))}
+          </div>
         </div>
+
+        {/* Category Filters */}
         <div className="flex items-center gap-4 overflow-x-auto pb-2 md:pb-0">
           <Filter className="text-slate-500" size={20} />
           {categories.map(cat => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-full whitespace-nowrap transition-all border ${selectedCategory === cat ? 'bg-blue-100 border-primary text-primary' : 'bg-transparent border-slate-200 text-slate-500 hover:text-slate-800'}`}
+              className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all border ${selectedCategory === cat ? 'bg-blue-100 border-primary text-primary' : 'bg-transparent border-slate-200 text-slate-500 hover:text-slate-800'}`}
             >
               {cat}
             </button>
@@ -201,6 +255,8 @@ const CareerExplorer = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredCareers.map((career, i) => {
           const matchScore = resumeMatchScores ? resumeMatchScores[career.id] : null;
+          const isCompatible = !profile?.stream || profile.stream === 'All' || career.stream === profile.stream;
+          
           return (
             <AnimatedSection key={career.id} delay={0.1 * i}>
               <GlassCard className="h-full flex flex-col cursor-pointer group" onClick={() => navigate(`/career/${career.id}`)}>
@@ -209,33 +265,42 @@ const CareerExplorer = () => {
                     {career.icon}
                   </div>
                   
-                  <div className="flex items-center gap-2">
-                    {matchScore !== null && (
-                      <span className={`text-xs font-bold px-2 py-1 rounded-full ${
-                        matchScore >= 75 ? 'bg-green-100 text-green-700' : matchScore >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-slate-100 text-slate-600'
-                      }`}>
-                        {matchScore}% Match
+                  <div className="flex flex-col items-end gap-1.5">
+                    <div className="flex items-center gap-2">
+                      {matchScore !== null && (
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                          matchScore >= 75 ? 'bg-green-100 text-green-700' : matchScore >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-slate-100 text-slate-600'
+                        }`}>
+                          {matchScore}% Match
+                        </span>
+                      )}
+                      <span className="text-xs font-semibold px-3 py-1 rounded-full bg-slate-50 text-slate-600">
+                        {career.category}
                       </span>
-                    )}
-                    <span className="text-xs font-semibold px-3 py-1 rounded-full bg-slate-50 text-slate-600">
-                      {career.category}
+                    </div>
+                    {/* Stream Warning / Compatibility */}
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                      isCompatible ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'
+                    }`}>
+                      {career.stream} Stream Required
                     </span>
                   </div>
                 </div>
                 
-                <h3 className="text-2xl font-bold mb-6 group-hover:text-primary transition-colors">{career.title}</h3>
+                <h3 className="text-2xl font-bold mb-4 group-hover:text-primary transition-colors text-slate-900">{career.title}</h3>
+                <p className="text-xs text-slate-400 mb-6 font-medium">Primary Hubs: {career.cities}</p>
                 
                 <div className="space-y-3 mb-8">
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-slate-500">Avg. Salary</span>
-                    <span className="font-bold text-green-400">{career.salary}</span>
+                    <span className="text-slate-500">Avg. Indian Salary</span>
+                    <span className="font-bold text-green-600">{career.salary}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-slate-500">Stress Level</span>
                     <span className={`font-bold ${career.stress === 'High' || career.stress === 'Extreme' ? 'text-red-400' : 'text-yellow-400'}`}>{career.stress}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-slate-500">AI Risk</span>
+                    <span className="text-slate-500">Automation / AI Risk</span>
                     <span className="font-bold text-secondary">{career.aiRisk}</span>
                   </div>
                 </div>

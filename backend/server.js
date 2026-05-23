@@ -56,9 +56,12 @@ const profileSchema = new mongoose.Schema({
       { title: "Cloud Architect", progress: 45 }
     ]
   },
-  unlockedBadges: { type: [String], default: ["1", "2", "3"] }
+  unlockedBadges: { type: [String], default: ["1", "2", "3"] },
+  grade: { type: String, default: "" },
+  stream: { type: String, default: "" }
 });
 const Profile = mongoose.model('Profile', profileSchema);
+
 
 
 // Basic route
