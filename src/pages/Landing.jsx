@@ -4,7 +4,7 @@ import { TypeAnimation } from 'react-type-animation';
 import NeonButton from '../components/NeonButton';
 import GlassCard from '../components/GlassCard';
 import AnimatedSection from '../components/AnimatedSection';
-import { Brain, Code, Shield, Sparkles, TrendingUp, Users, ArrowRight, UserCheck, BookOpen, GraduationCap, Briefcase } from 'lucide-react';
+import { Brain, Code, Shield, Sparkles, TrendingUp, Users, ArrowRight, UserCheck, BookOpen, GraduationCap, Cloud, Palette, X, Layers, Clock, Briefcase, PlayCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Landing = () => {
@@ -14,6 +14,7 @@ const Landing = () => {
   const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedStream, setSelectedStream] = useState('');
   const [savingOnboarding, setSavingOnboarding] = useState(false);
+  const [activeTrendingCourse, setActiveTrendingCourse] = useState(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -48,6 +49,8 @@ const Landing = () => {
         const updated = await response.json();
         setProfile(updated);
         setShowOnboarding(false);
+        // Direct route to explorer based on onboarding selection
+        navigate(`/explorer?stage=${encodeURIComponent(selectedGrade)}`);
       }
     } catch (err) {
       console.error('Error saving onboarding:', err);
@@ -56,10 +59,64 @@ const Landing = () => {
     }
   };
 
-  const featuredCareers = [
-    { title: "AI Engineer", icon: <Brain className="text-secondary" size={32} />, demand: "+45% Growth", salary: "₹15L - ₹35L LPA" },
-    { title: "Cybersecurity", icon: <Shield className="text-primary" size={32} />, demand: "+35% Growth", salary: "₹10L - ₹28L LPA" },
-    { title: "Full-Stack Dev", icon: <Code className="text-blue-500" size={32} />, demand: "+25% Growth", salary: "₹8L - ₹22L LPA" },
+  const trendingCourses = [
+    {
+      id: "ai",
+      title: "Generative AI & LLM Engineering",
+      icon: <Brain className="text-violet-500" size={32} />,
+      demand: "+45% Growth",
+      salary: "₹12L - ₹38L LPA",
+      duration: "6 Months",
+      difficulty: "Advanced",
+      tools: ["PyTorch", "Transformers", "LangChain", "Pinecone", "vLLM"],
+      unlockedRoles: ["AI Engineer", "MLOps Expert", "Prompt Architect"],
+      modules: [
+        { name: "Module 1: Foundations of Deep Learning", details: "Neural networks, gradient descent, optimization, and PyTorch syntax basics." },
+        { name: "Module 2: Transformers & LLMs", details: "Self-attention mechanics, transformer architecture, BERT, and GPT configurations." },
+        { name: "Module 3: Retrieval Augmented Generation (RAG)", details: "Vector database indexing (Pinecone, Chroma), semantic search, and document chunking." },
+        { name: "Module 4: Fine-Tuning & MLOps", details: "QLoRA parameter-efficient training, model quantization, LLM safety guardrails, and hosting APIs with FastAPI & Docker." }
+      ],
+      project: "A real-time enterprise contract analyzer parsing 100k+ documents with RAG and LLM agents.",
+      careerId: "ai"
+    },
+    {
+      id: "cloud",
+      title: "Cloud Native & DevOps SRE",
+      icon: <Cloud className="text-sky-500" size={32} />,
+      demand: "+35% Growth",
+      salary: "₹10L - ₹30L LPA",
+      duration: "5 Months",
+      difficulty: "Intermediate",
+      tools: ["Docker", "Kubernetes", "Terraform", "GitHub Actions", "AWS"],
+      unlockedRoles: ["Cloud Architect", "Site Reliability Engineer (SRE)", "DevOps Engineer"],
+      modules: [
+        { name: "Module 1: Virtualization & Linux Command Line", details: "Linux file system permissions, SSH configurations, bash scripting, and networks." },
+        { name: "Module 2: Containerization with Docker", details: "Writing multi-stage Dockerfiles, building container images, registry management, and Docker Compose orchestration." },
+        { name: "Module 3: Infrastructure as Code (IaC)", details: "Writing declarative Cloud resources in AWS/GCP using HashiCorp Terraform templates." },
+        { name: "Module 4: Kubernetes & GitOps Pipelines", details: "Pod scheduling, ingress routing, Helm charts, and continuous deployments using ArgoCD." }
+      ],
+      project: "Design and deploy a zero-downtime, multi-region Kubernetes cluster hosting a MERN app with active monitoring.",
+      careerId: "cloud"
+    },
+    {
+      id: "ux",
+      title: "UI/UX Product Design & Prototyping",
+      icon: <Palette className="text-pink-500" size={32} />,
+      demand: "+25% Growth",
+      salary: "₹6L - ₹18L LPA",
+      duration: "4 Months",
+      difficulty: "Beginner-Friendly",
+      tools: ["Figma", "Adobe Illustrator", "Prototyping", "User Interviews", "WCAG"],
+      unlockedRoles: ["UI/UX Designer", "Product Designer", "Design Systems Engineer"],
+      modules: [
+        { name: "Module 1: Design Heuristics & Research", details: "Understanding user goals, conducting interviews, creating user personas, and heuristic evaluation audits." },
+        { name: "Module 2: Typography & Grids", details: "Visual hierarchies, grid layout systems, rule of thirds, and color theory physics." },
+        { name: "Module 3: Figma Design Systems", details: "Creating reusable component variants, auto-layout constraints, and design tokens." },
+        { name: "Module 4: High-Fidelity Interactive Prototypes", details: "Creating realistic micro-interactions, spring animations, transitions, and user testing logs." }
+      ],
+      project: "Design and research an accessible healthcare mobile application tailored specifically for elderly citizens in India.",
+      careerId: "ux"
+    }
   ];
 
   return (
@@ -78,7 +135,7 @@ const Landing = () => {
             </span>
           </div>
           <button 
-            onClick={() => navigate('/explorer')}
+            onClick={() => navigate(`/explorer?stage=${encodeURIComponent(profile.grade)}&stream=${encodeURIComponent(profile.stream)}`)}
             className="text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1 font-bold group"
           >
             Explore Curated Careers <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
@@ -102,7 +159,7 @@ const Landing = () => {
                 Personalize Your Career Journey
               </h2>
               <p className="text-sm text-slate-500 mb-6">
-                Tell us your current academic stage and stream to get customized salary ranges, entrance exam trackers, and roadmap matching for the Indian context.
+                Tell us your current academic stage to unlock custom salary ranges, entrance exam trackers, and roadmap matching for the Indian context.
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
@@ -120,7 +177,14 @@ const Landing = () => {
                     ].map(item => (
                       <button
                         key={item.key}
-                        onClick={() => setSelectedGrade(item.key)}
+                        onClick={() => {
+                          setSelectedGrade(item.key);
+                          if (item.key === 'Class 10') {
+                            setSelectedStream('All');
+                          } else if (selectedStream === 'All') {
+                            setSelectedStream('');
+                          }
+                        }}
                         className={`text-left p-3.5 rounded-xl border text-sm font-semibold transition-all ${
                           selectedGrade === item.key 
                             ? 'bg-blue-100 border-blue-500 text-blue-800' 
@@ -139,25 +203,35 @@ const Landing = () => {
                     <BookOpen size={16} className="text-blue-600" />
                     2. Select your stream / field of interest:
                   </label>
-                  <div className="flex flex-col gap-2.5">
-                    {[
-                      { key: 'Science', label: 'Science (PCM / PCB)' },
-                      { key: 'Commerce', label: 'Commerce (Finance / Business)' },
-                      { key: 'Arts & Design', label: 'Arts & Humanities / Design' }
-                    ].map(item => (
-                      <button
-                        key={item.key}
-                        onClick={() => setSelectedStream(item.key)}
-                        className={`text-left p-3.5 rounded-xl border text-sm font-semibold transition-all ${
-                          selectedStream === item.key 
-                            ? 'bg-blue-100 border-blue-500 text-blue-800' 
-                            : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-600'
-                        }`}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
+                  {selectedGrade === 'Class 10' ? (
+                    <div className="flex flex-col justify-center items-center h-full text-center p-6 bg-indigo-50 border border-dashed border-indigo-200 rounded-xl min-h-[160px]">
+                      <Sparkles className="text-indigo-600 mb-2 animate-pulse" size={28} />
+                      <span className="text-sm font-bold text-indigo-900">Explore All Streams</span>
+                      <p className="text-xs text-indigo-600/80 mt-1 max-w-[280px]">
+                        Class 10 students explore Science, Commerce, and Arts paths together to make the best stream choice.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2.5">
+                      {[
+                        { key: 'Science', label: 'Science (PCM / PCB)' },
+                        { key: 'Commerce', label: 'Commerce (Finance / Business)' },
+                        { key: 'Arts & Design', label: 'Arts & Humanities / Design' }
+                      ].map(item => (
+                        <button
+                          key={item.key}
+                          onClick={() => setSelectedStream(item.key)}
+                          className={`text-left p-3.5 rounded-xl border text-sm font-semibold transition-all ${
+                            selectedStream === item.key 
+                              ? 'bg-blue-100 border-blue-500 text-blue-800' 
+                              : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-600'
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -226,9 +300,9 @@ const Landing = () => {
         <h2 className="text-3xl font-bold text-center mb-8">Curated entry points for your <span className="neon-text">current stage</span></h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { title: "Class 10 Student", desc: "Which stream should you choose next? Learn about Science, Commerce, and Arts career pathways.", path: "/explorer", stream: "All" },
-            { title: "Class 12 Student", desc: "Find college entrance exams (JEE, NEET, CUET, CLAT), average packages, and degree requirements.", path: "/explorer", stream: "All" },
-            { title: "College / Graduate", desc: "Match your resume with AI, take skill quizzes to earn XP, and practice career simulations.", path: "/explorer", stream: "All" }
+            { title: "Class 10 Student", desc: "Which stream should you choose next? Learn about Science, Commerce, and Arts career pathways.", path: "/explorer", stage: "Class 10" },
+            { title: "Class 12 Student", desc: "Find college entrance exams (JEE, NEET, CUET, CLAT), average packages, and degree requirements.", path: "/explorer", stage: "Class 12" },
+            { title: "College / Graduate", desc: "Match your resume with AI, take skill quizzes to earn XP, and practice career simulations.", path: "/explorer", stage: "College Student" }
           ].map((entry, idx) => (
             <GlassCard key={idx} className="hover:shadow-md transition-shadow flex flex-col justify-between p-6">
               <div>
@@ -236,7 +310,7 @@ const Landing = () => {
                 <p className="text-sm text-slate-500 mb-6 leading-relaxed">{entry.desc}</p>
               </div>
               <button 
-                onClick={() => navigate(entry.path)}
+                onClick={() => navigate(`${entry.path}?stage=${encodeURIComponent(entry.stage)}`)}
                 className="text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1 self-start group"
               >
                 Start Exploring <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
@@ -261,35 +335,163 @@ const Landing = () => {
         ))}
       </AnimatedSection>
 
-      {/* Featured Careers */}
-      <AnimatedSection className="w-full my-16 max-w-5xl">
-        <h2 className="text-4xl font-bold text-center mb-12">Trending <span className="neon-text">High-Demand</span> Careers (India)</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {featuredCareers.map((career, i) => (
+      {/* Trending Skills In High Demand Section */}
+      <AnimatedSection className="w-full my-16 max-w-5xl relative">
+        <h2 className="text-4xl font-bold text-center mb-4">Trending <span className="neon-text">High-Demand</span> Courses (India)</h2>
+        <p className="text-center text-slate-500 mb-12">Click a course card below to explore its exact module curriculum, tools, capstones, and average packages.</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          {trendingCourses.map((course) => (
             <motion.div
-              key={i}
+              key={course.id}
               whileHover={{ y: -6 }}
               transition={{ type: "spring", stiffness: 300 }}
+              onClick={() => setActiveTrendingCourse(activeTrendingCourse?.id === course.id ? null : course)}
+              className="cursor-pointer"
             >
-              <GlassCard className="h-full flex flex-col items-start p-8 relative overflow-hidden group">
+              <GlassCard className={`h-full flex flex-col items-start p-8 relative overflow-hidden group transition-all ${activeTrendingCourse?.id === course.id ? 'border-primary shadow-[0_0_20px_rgba(59,130,246,0.15)] bg-slate-50' : 'border-slate-200'}`}>
                 <div className="absolute -right-10 -top-10 opacity-10 group-hover:opacity-20 transition-opacity">
-                  {career.icon}
+                  {course.icon}
                 </div>
-                <div className="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                  {career.icon}
+                <div className="mb-6 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                  {course.icon}
                 </div>
-                <h3 className="text-2xl font-bold mb-4 text-slate-900">{career.title}</h3>
-                <div className="flex gap-4 w-full text-xs font-semibold text-slate-600">
-                  <div className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg">{career.demand}</div>
-                  <div className="bg-green-50 text-green-700 px-3 py-1.5 rounded-lg">{career.salary}</div>
+                <h3 className="text-2xl font-bold mb-4 text-slate-900">{course.title}</h3>
+                
+                <div className="flex flex-wrap gap-2.5 w-full text-xs font-semibold text-slate-600 mb-6">
+                  <div className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                    <TrendingUp size={12} /> {course.demand}
+                  </div>
+                  <div className="bg-green-50 text-green-700 px-3 py-1.5 rounded-lg">
+                    {course.salary}
+                  </div>
+                </div>
+
+                <div className="mt-auto text-xs font-bold text-blue-600 flex items-center gap-1.5 group-hover:translate-x-1.5 transition-transform">
+                  {activeTrendingCourse?.id === course.id ? 'Close Details' : 'View Course Curriculum'} <ArrowRight size={14} />
                 </div>
               </GlassCard>
             </motion.div>
           ))}
         </div>
+
+        {/* Detailed Curriculum Expandable Area */}
+        <AnimatePresence>
+          {activeTrendingCourse && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="w-full overflow-hidden mt-6"
+            >
+              <GlassCard className="border-blue-200 bg-blue-50/30 p-8 relative">
+                <button 
+                  onClick={() => setActiveTrendingCourse(null)}
+                  className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-colors"
+                >
+                  <X size={20} />
+                </button>
+
+                <div className="flex flex-col lg:flex-row gap-8">
+                  {/* Left Column: Summary Info */}
+                  <div className="lg:w-1/3 border-r border-slate-200/50 pr-0 lg:pr-8">
+                    <div className="flex items-center gap-3 mb-4">
+                      {activeTrendingCourse.icon}
+                      <h3 className="text-2xl font-bold text-slate-900">{activeTrendingCourse.title}</h3>
+                    </div>
+                    <p className="text-sm text-slate-500 mb-6">
+                      Explore this high-demand Indian career pathway. Follow the structured step-by-step curriculum to unlock top opportunities.
+                    </p>
+
+                    <div className="space-y-4 mb-6 text-sm font-semibold">
+                      <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                        <span className="text-slate-500">Duration</span>
+                        <span className="text-slate-800">{activeTrendingCourse.duration}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                        <span className="text-slate-500">Difficulty</span>
+                        <span className="text-slate-800">{activeTrendingCourse.difficulty}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                        <span className="text-slate-500">Avg Package</span>
+                        <span className="text-green-600 font-bold">{activeTrendingCourse.salary}</span>
+                      </div>
+                    </div>
+
+                    <div className="mb-6">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Key Tools Taught</span>
+                      <div className="flex flex-wrap gap-2">
+                        {activeTrendingCourse.tools.map(tool => (
+                          <span key={tool} className="text-xs bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-md font-medium">
+                            {tool}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Unlocked Roles</span>
+                      <div className="flex flex-wrap gap-2">
+                        {activeTrendingCourse.unlockedRoles.map(role => (
+                          <span key={role} className="text-xs bg-indigo-50 border border-indigo-100 text-indigo-700 px-2.5 py-1 rounded-md font-semibold">
+                            {role}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Curriculum Modules & Projects */}
+                  <div className="lg:w-2/3 flex flex-col justify-between">
+                    <div>
+                      <h4 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <Layers size={18} className="text-blue-600" />
+                        Course Curriculum & Modules
+                      </h4>
+                      <div className="space-y-4 mb-6">
+                        {activeTrendingCourse.modules.map((mod, index) => (
+                          <div key={index} className="p-4 bg-white border border-slate-100 rounded-xl shadow-sm flex items-start gap-3.5">
+                            <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center shrink-0">
+                              {index + 1}
+                            </div>
+                            <div>
+                              <h5 className="font-bold text-slate-900 text-sm mb-1">{mod.name}</h5>
+                              <p className="text-xs text-slate-500 font-medium leading-relaxed">{mod.details}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="p-4 bg-green-50/50 border border-green-150 rounded-xl mb-6">
+                        <h5 className="font-bold text-green-800 text-xs uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                          <Code size={14} /> Real-World Capstone Project
+                        </h5>
+                        <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                          {activeTrendingCourse.project}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end pt-4 border-t border-slate-200/50">
+                      <NeonButton 
+                        variant="primary" 
+                        onClick={() => navigate(`/career/${activeTrendingCourse.careerId}`)}
+                        className="flex items-center gap-2"
+                      >
+                        Enroll & View Full Interactive Roadmap <ArrowRight size={16} />
+                      </NeonButton>
+                    </div>
+                  </div>
+                </div>
+              </GlassCard>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </AnimatedSection>
     </div>
   );
 };
 
 export default Landing;
+

@@ -3,11 +3,300 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, CheckCircle2, Circle, Lock, Briefcase, TrendingUp, DollarSign, Clock, 
-  ChevronRight, X, Sparkles, Loader2, AlertCircle, PlayCircle, Quote 
+  ChevronRight, X, Sparkles, Loader2, AlertCircle, PlayCircle, Quote, Check, Code 
 } from 'lucide-react';
 import GlassCard from '../components/GlassCard';
 
 const roadmapData = {
+  // Class 10 Foundation Roads
+  'foundation-cs': {
+    title: 'Foundations of Computer Science',
+    color: 'blue',
+    description: 'Learn the core building blocks of computing, programming logic, and computational thinking for Class 10.',
+    totalYears: '1 year',
+    avgTopSalary: 'Skill Certificate',
+    videoUrl: "https://www.youtube.com/embed/zOjov-2OZ0E",
+    quote: {
+      author: "Sandeep Jain, Founder of GeeksforGeeks",
+      text: "Starting early is the best advantage. Focus on logic building, simple puzzle-solving, and binary arithmetic before jumping into syntax-heavy languages."
+    },
+    stages: [
+      {
+        level: 1,
+        title: 'Introduction to Logic & Algorithms',
+        yearsExp: '3 Months',
+        salary: 'Conceptual',
+        description: 'Understand how computers think, draw flowcharts, write basic pseudocode, and learn binary logic.',
+        skills: ['Flowcharts', 'Pseudocode', 'Binary Math', 'Variables', 'If/Else Logic'],
+        checklist: ['Draw 10 flowcharts for daily routines', 'Master decimal to binary conversions', 'Understand basic logic gates (AND, OR, NOT)'],
+        project: 'Create a text-based decision adventure flowchart on paper.'
+      },
+      {
+        level: 2,
+        title: 'Block Programming & Scratch',
+        yearsExp: '3 Months',
+        salary: 'Conceptual',
+        description: 'Build simple games and visual stories using block coding. Focus on loops and events.',
+        skills: ['Loops', 'Event Triggers', 'Animations', 'Conditionals', 'Scratch Interface'],
+        checklist: ['Create a sprite animation', 'Implement collision detection triggers', 'Build a simple score calculator'],
+        project: 'Develop a fully playable "Catch the Falling Apples" game in Scratch.'
+      },
+      {
+        level: 3,
+        title: 'Python for Beginners',
+        yearsExp: '6 Months',
+        salary: 'Conceptual',
+        description: 'Transition from blocks to text-based coding using Python. Learn syntax, inputs, and functions.',
+        skills: ['Python Syntax', 'List/Arrays', 'Input/Output', 'Functions', 'Turtle Graphics'],
+        checklist: ['Write a program to calculate simple interest', 'Implement string reverse functions', 'Use Turtle Graphics to draw shapes'],
+        project: 'Build a command-line Guess the Number game with user inputs and error checks.'
+      }
+    ]
+  },
+  'foundation-finance': {
+    title: 'Financial Literacy & Banking',
+    color: 'amber',
+    description: 'Understand the world of money, savings, personal finance, and modern banking systems for Class 10.',
+    totalYears: '1 year',
+    avgTopSalary: 'Skill Certificate',
+    videoUrl: "https://www.youtube.com/embed/y83E8T-m1Sg",
+    quote: {
+      author: "Nikhil Kamath, Co-Founder of Zerodha",
+      text: "Understanding compounding interest early in life is a superpower. Start by managing a small pocket money budget and tracking every rupee."
+    },
+    stages: [
+      {
+        level: 1,
+        title: 'Money & Simple Banking',
+        yearsExp: '4 Months',
+        salary: 'Conceptual',
+        description: 'Learn history of currency, how savings accounts work, fixed deposits, and basic debit/credit cards.',
+        skills: ['Savings Accounts', 'Fixed Deposits', 'Compound Interest', 'Debit/Credit Cards'],
+        checklist: ['Understand SBI savings account interest rates', 'Calculate simple interest vs compound interest', 'Read a sample bank statement'],
+        project: 'Create a monthly spreadsheet detailing income and expenditure of a mock family budget.'
+      },
+      {
+        level: 2,
+        title: 'Modern Digital Finance',
+        yearsExp: '4 Months',
+        salary: 'Conceptual',
+        description: 'Learn the workings of UPI, mobile wallets, net banking, and online safety against financial scams.',
+        skills: ['UPI (Unified Payments Interface)', 'Mobile Wallets', 'Net Banking Safety', 'Phishing Awareness'],
+        checklist: ['Trace how a UPI payment works from Bank A to Bank B', 'Identify 3 signs of a fake phishing link', 'Explain two-factor authentication'],
+        project: 'Design a poster/guide on "5 Rules of Digital Safety for Grandparents".'
+      },
+      {
+        level: 3,
+        title: 'Investing & Stock Markets Basics',
+        yearsExp: '4 Months',
+        salary: 'Conceptual',
+        description: 'Introduction to stocks, mutual funds, gold, real estate, and the power of inflation.',
+        skills: ['Inflation Basics', 'Nifty & Sensex', 'Mutual Funds', 'Diversification'],
+        checklist: ['Explain how inflation reduces money value', 'Explain what a share index like Nifty represents', 'Understand long-term compounding'],
+        project: 'Select 5 dummy companies and track their stock performance over 2 weeks.'
+      }
+    ]
+  },
+  'foundation-design': {
+    title: 'Introduction to Visual Design',
+    color: 'pink',
+    description: 'Explore the basics of color, typography, composition, and digital illustration tools for Class 10.',
+    totalYears: '1 year',
+    avgTopSalary: 'Skill Certificate',
+    videoUrl: "https://www.youtube.com/embed/YqQx75OPRa0",
+    quote: {
+      author: "Abhinav Chhikara, Founder of 10k Designers",
+      text: "Design is about hierarchy and clarity. Train your eyes by looking at billboards, websites, and magazines to dissect why they look clean or cluttered."
+    },
+    stages: [
+      {
+        level: 1,
+        title: 'Drawing & Composition',
+        yearsExp: '4 Months',
+        salary: 'Conceptual',
+        description: 'Learn the basic principles of design: balance, contrast, alignment, and proximity.',
+        skills: ['Rule of Thirds', 'Color Theory', 'Contrast', 'Grid Systems'],
+        checklist: ['Create a color wheel using watercolors', 'Sketch 10 geometric compositions', 'Find examples of bad alignment in advertisements'],
+        project: 'Sketch a poster design on paper demonstrating balance and visual hierarchy.'
+      },
+      {
+        level: 2,
+        title: 'Typography & Fonts',
+        yearsExp: '4 Months',
+        salary: 'Conceptual',
+        description: 'Discover font families: Serif, Sans-Serif, Display. Learn how typography conveys emotions.',
+        skills: ['Font Pairing', 'Kerning & Leading', 'Typography Hierarchy', 'Creative Lettering'],
+        checklist: ['Differentiate between Serif and Sans-Serif', 'Pair a heading font with a readable body font', 'Design a hand-drawn logo of your initials'],
+        project: 'Create a typography-only poster with a quote, focusing on type hierarchy.'
+      },
+      {
+        level: 3,
+        title: 'Digital Tools (Canva & Figma Basics)',
+        yearsExp: '4 Months',
+        salary: 'Conceptual',
+        description: 'Transition sketches into digital vector layouts using free software like Canva or Figma.',
+        skills: ['Vector Tools', 'Layout Design', 'Exporting Assets', 'Layers & Masks'],
+        checklist: ['Draw basic shapes in Figma', 'Organize layers logically', 'Design a card UI or social media post banner'],
+        project: 'Design a digital birthday invitation card using Figma vector tools.'
+      }
+    ]
+  },
+
+  // Class 12 Degrees & Prep Roads
+  'btech-cse': {
+    title: 'B.Tech Computer Science (JEE Prep)',
+    color: 'blue',
+    description: 'Prepare for India\'s premier engineering entrance exams and master early CS academics.',
+    totalYears: '4 Years (Degree)',
+    avgTopSalary: '₹12L - ₹45L+ LPA',
+    videoUrl: "https://www.youtube.com/embed/p9VbZpE386k",
+    quote: {
+      author: "Dr. H. C. Verma, Author of Concepts of Physics",
+      text: "Do not memorize equations. Visualize concepts in mechanics, electromagnetism, and coordinate geometry. Problem-solving speed comes naturally with deep conceptual clarity."
+    },
+    stages: [
+      {
+        level: 1,
+        title: 'JEE Main & Advanced Preparation',
+        yearsExp: 'Class 11 & 12',
+        salary: 'Academic Prep',
+        description: 'Master advanced Physics (Mechanics, Electrodynamics), Chemistry (Organic, Inorganic, Physical), and Mathematics (Calculus, Algebra, Coordinate Geometry).',
+        skills: ['JEE Physics', 'JEE Chemistry', 'JEE Mathematics', 'Speed & Accuracy'],
+        checklist: ['Solve past 10 years JEE papers', 'Take 50+ timed full-length mock exams', 'Maintain a separate formula copy'],
+        project: 'Score high percentile in JEE Main & Advanced to secure admissions in IITs, NITs, or IIITs.'
+      },
+      {
+        level: 2,
+        title: 'Engineering Core - Semester 1 to 4',
+        yearsExp: 'College Year 1-2',
+        salary: 'Academic Stage',
+        description: 'Learn college fundamentals: Calculus, Digital Logic, Computer Networks, and Object-Oriented Programming (C++ or Java).',
+        skills: ['C++ / Java', 'OOPs Concepts', 'Digital Logic', 'Computer Networks', 'OS Basics'],
+        checklist: ['Implement memory management loops', 'Understand process scheduling algorithms', 'Design boolean logic gates on simulators'],
+        project: 'Create a custom Command Line Interface shell using C++.'
+      },
+      {
+        level: 3,
+        title: 'DSA & Competitive Programming',
+        yearsExp: 'College Year 2-3',
+        salary: 'Internship Ready',
+        description: 'Master Data Structures and Algorithms (Trees, Graphs, Dynamic Programming). Participate in Codeforces/LeetCode coding challenges.',
+        skills: ['Linked Lists & Trees', 'Recursion & DP', 'Graph Algorithms', 'Time Complexity (Big O)'],
+        checklist: ['Solve 300+ LeetCode problems', 'Participate in Google Kickstart / HashCode', 'Master Recursion and DFS/BFS search'],
+        project: 'Implement a Pathfinding Visualizer (Dijkstra/A* Algorithm) using HTML5 Canvas or React.'
+      },
+      {
+        level: 4,
+        title: 'Campus Placements & Software Projects',
+        yearsExp: 'College Year 4',
+        salary: '₹8L – ₹25L LPA',
+        description: 'Build full-stack capstone projects, write technical system design reports, and clear HR / tech interviews.',
+        skills: ['System Design', 'Full-stack Project', 'Resume Building', 'Mock Interviews'],
+        checklist: ['Prepare mock system design responses', 'Review OOP concepts and DBMS (SQL)', 'Complete 2 full-scale projects'],
+        project: 'Develop a Peer-to-Peer local file sharing app using WebRTC and Node.js.'
+      }
+    ]
+  },
+  'bca': {
+    title: 'Bachelor of Computer Applications (BCA)',
+    color: 'sky',
+    description: 'Learn modern software applications, database architectures, and practical coding frameworks for BCA.',
+    totalYears: '3 Years (Degree)',
+    avgTopSalary: '₹6L - ₹15L LPA',
+    videoUrl: "https://www.youtube.com/embed/P3gN4k7G6H4",
+    quote: {
+      author: "Kunal Kushwaha, Developer Advocate",
+      text: "BCA is highly practical. Focus on building real projects, contributing to open-source, and learning Git early. Degrees don't get you jobs—proof of work does."
+    },
+    stages: [
+      {
+        level: 1,
+        title: 'Software & Web Basics',
+        yearsExp: 'Year 1',
+        salary: 'Academic Stage',
+        description: 'Learn web development (HTML, CSS, JavaScript) and core programming (C / C++).',
+        skills: ['C Programming', 'HTML & CSS', 'JavaScript Basics', 'SQL Databases'],
+        checklist: ['Write 50 console programs in C', 'Create responsive static webpages', 'Write basic database SELECT and JOIN queries'],
+        project: 'Build a responsive personal website containing a simple calculator tool.'
+      },
+      {
+        level: 2,
+        title: 'OOPs & Database Management Systems',
+        yearsExp: 'Year 2',
+        salary: 'Academic Stage',
+        description: 'Understand Object-Oriented programming with Java, system analysis, and advanced relational databases.',
+        skills: ['Java Programming', 'Relational Databases', 'System Analysis', 'Software Engineering'],
+        checklist: ['Master inheritance, polymorphism in Java', 'Design ER Diagrams for banking systems', 'Write stored procedures in MySQL'],
+        project: 'Develop a Desktop Student Management System using Java Swing and MySQL.'
+      },
+      {
+        level: 3,
+        title: 'Full Stack Web Projects & Placements',
+        yearsExp: 'Year 3',
+        salary: '₹3.5L – ₹8L LPA',
+        description: 'Master full-stack frameworks like Node.js / React, prepare resumes, and apply for campus placements.',
+        skills: ['React.js', 'Node.js & Express', 'MongoDB', 'REST APIs', 'Git / GitHub'],
+        checklist: ['Complete a MERN stack course', 'Host projects live on Vercel and Render', 'Prepare for technical interview questions'],
+        project: 'Build a real-time collaborative task board (like Trello) using React, Socket.io, and Node.js.'
+      }
+    ]
+  },
+  'bdes': {
+    title: 'Bachelor of Design (B.Des)',
+    color: 'pink',
+    description: 'Master creative UX, product design, fashion design, or graphic layouts in top design colleges.',
+    totalYears: '4 Years (Degree)',
+    avgTopSalary: '₹10L - ₹24L LPA',
+    videoUrl: "https://www.youtube.com/embed/n4p_q0i1N2g",
+    quote: {
+      author: "Sudhir Sharma, Chief Editor of Pool Magazine",
+      text: "Design is a process of problem-solving. Keep a sketchpad everywhere. Learn to observe how people struggle with interfaces, packaging, and spaces, and design solutions."
+    },
+    stages: [
+      {
+        level: 1,
+        title: 'Design Foundations & Sketching',
+        yearsExp: 'Year 1',
+        salary: 'Academic Stage',
+        description: 'Learn perspective drawing, form and space analysis, color physics, and material exploration.',
+        skills: ['Perspective Sketching', 'Color Harmonies', 'Material Exploration', '2D Composition'],
+        checklist: ['Complete 50 perspective sketches', 'Differentiate between warm and cool compositions', 'Build form models using cardboard/clay'],
+        project: 'Create a conceptual model of a hybrid home office storage organizer.'
+      },
+      {
+        level: 2,
+        title: 'Digital Tools & Layouts',
+        yearsExp: 'Year 2',
+        salary: 'Academic Stage',
+        description: 'Learn design software: Adobe Photoshop, Illustrator, InDesign, and vector tools in Figma.',
+        skills: ['Vector Illustration', 'Photo Manipulation', 'Page Layout Design', 'Figma Wireframes'],
+        checklist: ['Design 10 vector logos in Illustrator', 'Assemble a 16-page brochure in InDesign', 'Wireframe a mobile login page in Figma'],
+        project: 'Design a corporate branding kit (logo, business cards, letterhead) for a green-energy startup.'
+      },
+      {
+        level: 3,
+        title: 'Interaction Design & User Research',
+        yearsExp: 'Year 3',
+        salary: 'Internship Ready',
+        description: 'Perform user interviews, build user personas, conduct usability heuristics audits, and design mobile apps.',
+        skills: ['User Interviews', 'UX Heuristics', 'High-Fidelity Prototypes', 'Information Architecture'],
+        checklist: ['Interview 5 users about a shopping app', 'Create user journey maps', 'Run usability tests on high-fidelity designs'],
+        project: 'Design a mobile medicine-delivery application specifically for elderly users, including full user research.'
+      },
+      {
+        level: 4,
+        title: 'Design Thesis & Professional Portfolio',
+        yearsExp: 'Year 4',
+        salary: '₹6L – ₹15L LPA',
+        description: 'Create your graduation capstone project, refine your portfolio, and pitch to design studios.',
+        skills: ['Design Portfolio', 'Pitching & Presentation', 'Industry Standards', 'Interactive Prototype'],
+        checklist: ['Assemble a Behance / Web portfolio with 3 case studies', 'Prepare your design slides presentation', 'Mock client feedback sessions'],
+        project: 'Complete a detailed B.Des graduation thesis project addressing city traffic micro-mobility.'
+      }
+    ]
+  },
+
+  // College Professional Roads (Existing expanded with checklists & projects)
   swe: {
     title: 'Software Engineer',
     color: 'blue',
@@ -24,42 +313,82 @@ const roadmapData = {
         level: 1,
         title: 'Junior Software Engineer',
         yearsExp: '0–2 years',
-        salary: '₹6L – ₹10L LPA',
-        description: 'Entry-level. You write code under supervision, fix bugs, and learn the enterprise codebase.',
-        skills: ['HTML/CSS', 'JavaScript/Python', 'Git Basics', 'REST APIs', 'SQL Basics'],
+        salary: '₹6L – ₹12L LPA',
+        description: 'Entry-level position. Focus on learning collaborative workflows, fixing bugs, writing clean functions, and understanding the codebase.',
+        skills: ['HTML5 & CSS3', 'JavaScript (ES6+)', 'Git & GitHub', 'REST APIs', 'SQL Queries', 'Package Managers (npm)', 'Browser DevTools'],
+        checklist: [
+          'Master async JS: Promises, Async/Await, and error handling.',
+          'Learn Git commands: branching, merging, and resolving conflicts.',
+          'Understand REST API design, HTTP status codes, and methods.',
+          'Write basic relational queries: SELECT, JOIN, WHERE, and GROUP BY.',
+          'Implement fluid responsive layouts using CSS Grid and Flexbox.'
+        ],
+        project: 'Build a responsive Task Manager web app using React, storing tasks in a Node.js/Express API with a PostgreSQL database.'
       },
       {
         level: 2,
         title: 'Software Engineer (Mid-Level)',
         yearsExp: '2–5 years',
-        salary: '₹10L – ₹18L LPA',
-        description: 'You independently own features, participate in code reviews, and mentor interns.',
-        skills: ['System Design Basics', 'Testing & CI/CD', 'Cloud Services (AWS/GCP)', 'Databases', 'Agile/Scrum'],
+        salary: '₹12L – ₹22L LPA',
+        description: 'Independently own features, participate in architecture design, write unit/integration tests, and build containerized deployments.',
+        skills: ['React/Next.js', 'Node.js & Express', 'PostgreSQL DB', 'Unit Testing (Jest)', 'CI/CD Pipelines', 'Docker', 'AWS Basics (S3/EC2)'],
+        checklist: [
+          'Apply OOP concepts and SOLID principles in daily coding.',
+          'Write comprehensive unit tests achieving 80%+ coverage with Jest.',
+          'Containerize local server architectures using Docker multi-stage builds.',
+          'Set up automated compilation and testing pipelines with GitHub Actions.',
+          'Optimize relational database models, normalizations, and foreign keys.'
+        ],
+        project: 'Create a scalable URL Shortener API with Redis caching, request rate-limiting, and automated deployment.'
       },
       {
         level: 3,
         title: 'Senior Software Engineer',
         yearsExp: '5–8 years',
-        salary: '₹18L – ₹32L LPA',
-        description: 'You lead technical decisions, architect database models, and design microservices.',
-        skills: ['Architecture Patterns', 'Performance Optimization', 'Technical Leadership', 'Cross-team Collaboration'],
+        salary: '₹22L – ₹38L LPA',
+        description: 'Lead technical choices, design microservices, optimize performance bottlenecks, and scale databases.',
+        skills: ['System Design (LLD/HLD)', 'Microservices', 'NoSQL DBs (MongoDB)', 'Performance Tuning', 'Message Queues (Kafka)', 'Cloud IAM'],
+        checklist: [
+          'Design distributed microservices with API Gateways and load balancers.',
+          'Optimize database indexing, partitioning, and read/write replica routing.',
+          'Implement event-driven patterns with Kafka or RabbitMQ.',
+          'Perform security audits on backend APIs, JWTs, and cloud storage folders.',
+          'Mentor junior engineers and write clean, comprehensive code reviews.'
+        ],
+        project: 'Develop a real-time multiplayer game matching server utilizing WebSockets, Redis pub/sub, and Kafka queues.'
       },
       {
         level: 4,
         title: 'Staff Engineer',
         yearsExp: '8–12 years',
-        salary: '₹32L – ₹55L LPA',
-        description: 'You define engineering strategy across multiple squads and drive tech stack decisions.',
-        skills: ['Org-wide Technical Strategy', 'RFC Writing', 'Platform Thinking', 'Stakeholder Management'],
+        salary: '₹38L – ₹65L LPA',
+        description: 'Set organizational tech stack guidelines, write RFC design papers, manage technical debt, and build developer platforms.',
+        skills: ['Distributed Systems', 'RFC Writing', 'Kubernetes Orchestration', 'Database Sharding', 'Cloud FinOps', 'Security Standards'],
+        checklist: [
+          'Write thorough Request for Comments (RFC) documents for architecture shifts.',
+          'Design horizontal database sharding schemas across thousands of nodes.',
+          'Configure Kubernetes auto-scaling, service meshes, and namespace boundaries.',
+          'Align multi-squad tech stacks with product roadmaps and release cycles.',
+          'Audit and reduce cloud costs via automated FinOps sizing configurations.'
+        ],
+        project: 'Lead the migration of a massive monolithic production database to a zero-downtime sharded PostgreSQL cluster.'
       },
       {
         level: 5,
-        title: 'Principal Engineer / Engineering Director',
+        title: 'Principal Engineer / Tech Director',
         yearsExp: '12+ years',
-        salary: '₹50L – ₹90L+ LPA',
-        description: 'Top of the technical track. You shape organizational culture, product vision, and platform scaling.',
-        skills: ['People Management', 'Executive Communication', 'Vision Setting', 'P&L Understanding'],
-      },
+        salary: '₹65L – ₹1.2Cr+ LPA',
+        description: 'Top technical level. Shape engineering culture, evaluate new tech, negotiate cloud contracts, and scale systems to millions of users.',
+        skills: ['Org Strategy', 'C-Suite Tech Advisory', 'Platform Engineering', 'Hybrid Cloud', 'Disaster Recovery (DR)', 'Tech Branding'],
+        checklist: [
+          'Formulate the company\'s multi-year cloud and platform migration strategy.',
+          'Establish technical review boards and engineer leveling guidelines.',
+          'Optimize cloud contract spend and AWS/Azure enterprise reservation agreements.',
+          'Design active-active multi-region failovers and verify recovery times (RTO/RPO).',
+          'Write open-source libraries and speak at global tech conferences.'
+        ],
+        project: 'Oversee zero-downtime serverless payment system migration, saving 45% in infrastructure costs and reducing P99 latency.'
+      }
     ],
   },
   ai: {
@@ -79,41 +408,81 @@ const roadmapData = {
         title: 'Junior ML Engineer / AI Developer',
         yearsExp: '0–2 years',
         salary: '₹8L – ₹14L LPA',
-        description: 'Build and fine-tune basic ML models, deploy HuggingFace transformers, and test algorithms.',
-        skills: ['Python', 'NumPy/Pandas', 'Scikit-learn', 'TensorFlow/PyTorch', 'Jupyter Notebooks'],
+        description: 'Master data analysis, clean messy real-world datasets, and build baseline regression/classification ML models.',
+        skills: ['Python', 'NumPy & Pandas', 'Scikit-learn', 'Linear Algebra & Calculus', 'Data Visualizations', 'Jupyter Notebooks'],
+        checklist: [
+          'Perform Exploratory Data Analysis (EDA) on datasets with millions of rows.',
+          'Understand statistical mechanics: distributions, variances, and hypothesis testing.',
+          'Train, evaluate, and hyperparameter-tune classical Scikit-learn algorithms.',
+          'Clean and preprocess data: missing values, normalization, and label encoding.',
+          'Create interactive dashboards to present insights using Streamlit or Seaborn.'
+        ],
+        project: 'Develop a flight delay prediction model and host it as a simple dashboard using Python and Streamlit.'
       },
       {
         level: 2,
         title: 'ML Engineer / AI Engineer',
         yearsExp: '2–5 years',
-        salary: '₹14L – ₹24L LPA',
-        description: 'Train, evaluate, deploy, and scale production ML models and NLP systems.',
-        skills: ['Deep Learning', 'MLOps & Pipelines', 'NLP Basics', 'Cloud ML (SageMaker/Vertex)', 'A/B Testing'],
+        salary: '₹14L – ₹25L LPA',
+        description: 'Build and deploy deep learning models, configure continuous ML training runs, and host models in production APIs.',
+        skills: ['PyTorch / TensorFlow', 'Deep Learning (CNNs/RNNs)', 'FastAPI & API Design', 'Docker Containers', 'MLOps (MLflow)', 'AWS SageMaker'],
+        checklist: [
+          'Train custom convolutional neural networks for complex computer vision tasks.',
+          'Integrate MLflow or Weights & Biases to track training metrics and weights.',
+          'Package models into Docker containers and deploy to AWS EC2 or ECS.',
+          'Optimize model runtimes using ONNX and TensorRT quantization tools.',
+          'Set up automated data validation checks on incoming inference records.'
+        ],
+        project: 'Deploy a high-throughput medical image classification API using PyTorch, FastAPI, and Docker on AWS ECS.'
       },
       {
         level: 3,
         title: 'Senior AI Engineer / LLM Specialist',
         yearsExp: '5–8 years',
-        salary: '₹24L – ₹45L LPA',
-        description: 'Design complex deep learning frameworks, optimize inference costs, and deploy custom GenAI models.',
-        skills: ['LLMs & Fine-tuning', 'Reinforcement Learning', 'AI Ethics', 'Vector DBs (Pinecone/Milvus)'],
+        salary: '₹25L – ₹48L LPA',
+        description: 'Fine-tune open-source LLMs, build advanced Retrieval Augmented Generation (RAG) pipelines, and architect vector search databases.',
+        skills: ['HuggingFace Transformers', 'LLM Fine-tuning (QLoRA)', 'Vector DBs (Pinecone)', 'LangChain & LlamaIndex', 'Prompt Engineering', 'Model Guardrails'],
+        checklist: [
+          'Fine-tune open-source models (Llama 3, Mistral) on custom datasets using QLoRA.',
+          'Architect hybrid-search vector pipelines matching dense and sparse embeddings.',
+          'Configure indexing, partitioning, and caching inside Pinecone or Milvus databases.',
+          'Write custom input/output guardrails using NeMo to filter prompt injections.',
+          'Design complex multi-agent system loops using LangGraph or AutoGen.'
+        ],
+        project: 'Create an automated legal contract auditor that analyzes 10,000-page lease documents with RAG and LLM agents.'
       },
       {
         level: 4,
-        title: 'Lead AI Engineer / AI Architect',
+        title: 'AI Architect / Lead Engineer',
         yearsExp: '8–12 years',
-        salary: '₹45L – ₹75L LPA',
-        description: 'Architect scalable AI platforms, guide ML engineering best practices, and direct product AI pipelines.',
-        skills: ['AI Platform Architecture', 'Team Leadership', 'Product Strategy', 'ML System Design'],
+        salary: '₹48L – ₹80L LPA',
+        description: 'Architect large-scale enterprise AI frameworks, coordinate multi-GPU cluster usage, and audit data privacy compliance.',
+        skills: ['AI Platform Architecture', 'Multi-GPU Serving (vLLM)', 'Model Privacy', 'Distributed ML Training', 'Kubeflow Pipelines', 'AI Strategy'],
+        checklist: [
+          'Design distributed model training clusters using PyTorch DistributedDataParallel (DDP).',
+          'Deploy high-throughput inference engines utilizing vLLM and Triton servers.',
+          'Establish enterprise feature store systems and real-time inference tables.',
+          'Implement strict data compliance pipelines (PII masking, differential privacy).',
+          'Optimize neural network compute schedules to minimize GPU utilization costs.'
+        ],
+        project: 'Build an enterprise-wide generative search dashboard parsing 100k internal files in sub-10ms query latencies.'
       },
       {
         level: 5,
         title: 'Chief AI Officer / VP of AI',
         yearsExp: '12+ years',
-        salary: '₹75L – ₹1.5Cr+ LPA',
-        description: 'Executive level. Drive the company\'s overall AI product pipeline, data monetization, and AI security compliance.',
-        skills: ['Executive Leadership', 'AI Governance', 'Business Strategy', 'Board Communication'],
-      },
+        salary: '₹80L – ₹1.8Cr+ LPA',
+        description: 'Define organizational AI visions, manage multi-million dollar compute budgets, and establish AI compliance standards.',
+        skills: ['AI Governance', 'GPU Infrastructure Budgets', 'AI Ethics & Safety', 'Enterprise Data Strategy', 'C-Suite leadership'],
+        checklist: [
+          'Draft corporate governance standards for ethical and safe AI model operations.',
+          'Audit automated system structures against international AI acts (e.g., EU AI Act).',
+          'Manage multi-crore budgets for GPU hardware purchases and cloud compute contracts.',
+          'Advise corporate boards on strategic generative AI investments and monetization.',
+          'Scale AI research and product engineering departments from scratch.'
+        ],
+        project: 'Lead complete enterprise-wide transformation automating customer service and operations with custom AI agents, cutting operational costs by 35%.'
+      }
     ],
   },
   cyber: {
@@ -128,11 +497,41 @@ const roadmapData = {
       text: "With India's digital payment ecosystem growing exponentially, cybersecurity is a national priority. Learn how to think like a hacker to prevent exploits before they compromise live wallets."
     },
     stages: [
-      { level: 1, title: 'Security Analyst (Tier 1)', yearsExp: '0–2 years', salary: '₹5L – ₹8L LPA', description: 'Monitor alerts in the SOC, audit user permissions, and assist in incident reporting.', skills: ['SIEM Tools', 'Network Basics', 'Log Analysis', 'Incident Response', 'CompTIA Security+'] },
-      { level: 2, title: 'Security Engineer / Penetration Tester', yearsExp: '2–5 years', salary: '₹8L – ₹15L LPA', description: 'Conduct pen tests, discover vulnerabilities, and secure APIs and servers.', skills: ['Ethical Hacking', 'Metasploit', 'Web App Security (OWASP)', 'Scripting (Python/Bash)', 'CEH'] },
-      { level: 3, title: 'Senior Security Engineer', yearsExp: '5–8 years', salary: '₹15L – ₹28L LPA', description: 'Design threat modeling security frameworks and oversee red/blue team simulations.', skills: ['Zero Trust Architecture', 'Cloud Security', 'Threat Modeling', 'SOC Leadership'] },
-      { level: 4, title: 'Security Architect', yearsExp: '8–12 years', salary: '₹28L – ₹45L LPA', description: 'Build enterprise risk frameworks, audit compliance, and design security policies.', skills: ['Enterprise Security Design', 'Risk Management', 'Compliance (SOC2, ISO27001)', 'Vendor Auditing'] },
-      { level: 5, title: 'CISO / VP of Security', yearsExp: '12+ years', salary: '₹45L – ₹80L+ LPA', description: 'Executive level. Own the entire organization\'s security architecture, breach response, and security budget.', skills: ['Board Reporting', 'Crisis Leadership', 'Compliance', 'Budget Management'] },
+      { 
+        level: 1, title: 'Security Analyst (Tier 1)', yearsExp: '0–2 years', salary: '₹5L – ₹8L LPA', 
+        description: 'Monitor alerts in the SOC, audit user permissions, and assist in incident reporting.', 
+        skills: ['SIEM Tools', 'Network Basics', 'Log Analysis', 'Incident Response', 'CompTIA Security+'],
+        checklist: ['Configure Wireshark filters', 'Identify SQL Injection alerts in SIEM logs', 'Master Linux server log directories'],
+        project: 'Set up a local intrusion detection system (Snort) on a Virtualbox network.'
+      },
+      { 
+        level: 2, title: 'Penetration Tester / Security Engineer', yearsExp: '2–5 years', salary: '₹8L – ₹15L LPA', 
+        description: 'Conduct pen tests, discover vulnerabilities, and secure APIs and servers.', 
+        skills: ['Ethical Hacking', 'Metasploit', 'Web App Security (OWASP)', 'Scripting (Python/Bash)', 'CEH'],
+        checklist: ['Write custom automated port-scanner scripts in Python', 'Exploit OWASP Top 10 vulnerabilities in test sites', 'Decrypt MD5/SHA hashes'],
+        project: 'Conduct an authorized penetration testing audit of a local open-source project and document findings.'
+      },
+      { 
+        level: 3, title: 'Senior Security Engineer', yearsExp: '5–8 years', salary: '₹15L – ₹28L LPA', 
+        description: 'Design threat modeling security frameworks and oversee red/blue team simulations.', 
+        skills: ['Zero Trust Architecture', 'Cloud Security', 'Threat Modeling', 'SOC Leadership'],
+        checklist: ['Map complex network infrastructure using threat model systems', 'Deploy AWS IAM boundaries and security policies', 'Review reverse-engineering binary scripts'],
+        project: 'Develop a zero-trust single sign-on authentication gateway for a staging server.'
+      },
+      { 
+        level: 4, title: 'Security Architect', yearsExp: '8–12 years', salary: '₹28L – ' + '₹45L LPA', 
+        description: 'Build enterprise risk frameworks, audit compliance, and design security policies.', 
+        skills: ['Enterprise Security Design', 'Risk Management', 'Compliance (SOC2, ISO27001)', 'Vendor Auditing'],
+        checklist: ['Complete ISO27001 readiness audits', 'Create secure network topology reference designs', 'Audit cloud server access policies'],
+        project: 'Prepare a security policy playbook for a fintech startup preparing for an IPO.'
+      },
+      { 
+        level: 5, title: 'CISO / VP of Security', yearsExp: '12+ years', salary: '₹45L – ₹80L+ LPA', 
+        description: 'Executive level. Own the entire organization\'s security architecture, breach response, and security budget.', 
+        skills: ['Board Reporting', 'Crisis Leadership', 'Compliance', 'Budget Management'],
+        checklist: ['Deliver a security threat presentation to executive directors', 'Establish global disaster recovery protocols', 'Manage multi-crore security budgets'],
+        project: 'Manage live mitigation and recovery actions during a simulated major data breach drill.'
+      }
     ],
   },
   cloud: {
@@ -147,11 +546,41 @@ const roadmapData = {
       text: "Everything is migrating to the cloud. Focus on Infrastructure as Code (IaC) tools like Terraform and containerization with Kubernetes to stand out in the Indian job market."
     },
     stages: [
-      { level: 1, title: 'Cloud Support Engineer', yearsExp: '0–2 years', salary: '₹5L – ₹8L LPA', description: 'Manage accounts, provision simple virtual machines, and audit billing metrics.', skills: ['AWS/Azure/GCP Basics', 'Linux Command Line', 'Terraform Basics', 'Networking Fundamentals'] },
-      { level: 2, title: 'Cloud Engineer / DevOps Associate', yearsExp: '2–5 years', salary: '₹8L – ₹15L LPA', description: 'Configure Docker files, set up CI/CD pipelines, and scale databases.', skills: ['Infrastructure as Code', 'Docker & Kubernetes', 'CI/CD Pipelines', 'AWS / Azure'] },
-      { level: 3, title: 'Senior DevOps / SRE Engineer', yearsExp: '5–8 years', salary: '₹15L – ₹28L LPA', description: 'Lead automation scripts, optimize infrastructure costs, and manage server uptimes.', skills: ['Multi-cloud Strategy', 'Site Reliability Engineering', 'Platform Engineering', 'Cloud Security'] },
-      { level: 4, title: 'Cloud Architect', yearsExp: '8–12 years', salary: '₹28L – ₹48L LPA', description: 'Design secure, scalable cloud architectures across the organization.', skills: ['Enterprise Architecture', 'FinOps (Cost Mgmt)', 'Disaster Recovery', 'Governance'] },
-      { level: 5, title: 'Director of Infrastructure / Cloud VP', yearsExp: '12+ years', salary: '₹48L – ₹85L+ LPA', description: 'Head of global infrastructure, cloud migrations, vendor contract negotiations, and DevOps culture.', skills: ['C-Suite Communication', 'Infrastructure Strategy', 'Global Scale Design', 'Vendor Negotiation'] },
+      { 
+        level: 1, title: 'Cloud Support Engineer', yearsExp: '0–2 years', salary: '₹5L – ' + '₹8L LPA', 
+        description: 'Manage accounts, provision simple virtual machines, and audit billing metrics.', 
+        skills: ['AWS/Azure/GCP Basics', 'Linux Command Line', 'Terraform Basics', 'Networking Fundamentals'],
+        checklist: ['Set up AWS EC2 instances and VPC subnets', 'Configure SSH keys and firewalls', 'Monitor billing using AWS Cost Explorer'],
+        project: 'Host a static portfolio page on AWS S3 with Custom Domains and CloudFront CDN.'
+      },
+      { 
+        level: 2, title: 'Cloud Engineer / DevOps Associate', yearsExp: '2–5 years', salary: '₹8L – ' + '₹15L LPA', 
+        description: 'Configure Docker files, set up CI/CD pipelines, and scale databases.', 
+        skills: ['Infrastructure as Code', 'Docker & Kubernetes', 'CI/CD Pipelines', 'AWS / Azure'],
+        checklist: ['Containerize a web app with multi-stage Dockerfiles', 'Write Terraform templates for basic networks', 'Write GitHub Actions deploy scripts'],
+        project: 'Deploy a multi-tier web application (React + Node + Postgres) to AWS ECS using Terraform.'
+      },
+      { 
+        level: 3, title: 'Senior DevOps / SRE Engineer', yearsExp: '5–8 years', salary: '₹15L – ' + '₹28L LPA', 
+        description: 'Lead automation scripts, optimize infrastructure costs, and manage server uptimes.', 
+        skills: ['Multi-cloud Strategy', 'Site Reliability Engineering', 'Platform Engineering', 'Cloud Security'],
+        checklist: ['Establish prometheus and Grafana alert boundaries', 'Configure auto-scaling groups with ALB load balancers', 'Implement blue-green deployments'],
+        project: 'Build a highly resilient Kubernetes cluster (EKS) utilizing Helm Charts and ArgoCD.'
+      },
+      { 
+        level: 4, title: 'Cloud Architect', yearsExp: '8–12 years', salary: '₹28L – ' + '₹48L LPA', 
+        description: 'Design secure, scalable cloud architectures across the organization.', 
+        skills: ['Enterprise Architecture', 'FinOps (Cost Mgmt)', 'Disaster Recovery', 'Governance'],
+        checklist: ['Conduct security review of multi-cloud VPC designs', 'Manage FinOps dashboards to reduce cloud spend', 'Design active-active multi-region failovers'],
+        project: 'Design the disaster recovery backup migration path for a global streaming service.'
+      },
+      { 
+        level: 5, title: 'Director of Infrastructure / Cloud VP', yearsExp: '12+ years', salary: '₹48L – ' + '₹85L+ LPA', 
+        description: 'Head of global infrastructure, cloud migrations, vendor contract negotiations, and DevOps culture.', 
+        skills: ['C-Suite Communication', 'Infrastructure Strategy', 'Global Scale Design', 'Vendor Negotiation'],
+        checklist: ['Negotiate multi-million dollar AWS/Azure enterprise discounts', 'Formulate organizational hybrid-cloud transitions', 'Head SRE platform organizations'],
+        project: 'Lead the migration of a massive financial transaction backend from on-premise servers into a multi-cloud network.'
+      }
     ],
   },
   ux: {
@@ -166,11 +595,11 @@ const roadmapData = {
       text: "Design isn't just how it looks; it's how it works. Talk to your users, build wireframes, iterate constantly, and map out clean user journeys to design apps people love."
     },
     stages: [
-      { level: 1, title: 'Junior UI/UX Designer', yearsExp: '0–2 years', salary: '₹4.5L – ₹7L LPA', description: 'Create simple icons, wireframes, style guides, and assist in user testing.', skills: ['Figma / Sketch', 'Wireframing', 'User Research Basics', 'Visual Design'] },
-      { level: 2, title: 'UI/UX Designer', yearsExp: '2–5 years', salary: '₹7L – ₹14L LPA', description: 'Own product features, coordinate design systems, and run usability tests.', skills: ['Design Systems', 'Prototyping', 'A/B Testing', 'WCAG Accessibility'] },
-      { level: 3, title: 'Senior UX Designer', yearsExp: '5–8 years', salary: '₹14L – ₹25L LPA', description: 'Define the product design framework, lead user journeys, and mentor juniors.', skills: ['Product Strategy', 'UX Writing', 'Interaction Design', 'Stakeholder Pitching'] },
-      { level: 4, title: 'Principal Designer / Lead Researcher', yearsExp: '8–12 years', salary: '₹25L – ₹42L LPA', description: 'Set design directions across multiple teams, build design-thinking cultures.', skills: ['Design Systems at Scale', 'User Research Methodologies', 'Executive Alignment'] },
-      { level: 5, title: 'VP of Design / Chief Design Officer', yearsExp: '12+ years', salary: '₹42L – ₹65L+ LPA', description: 'Shape product brand strategy, direct design organization, and influence company vision.', skills: ['Creative Direction', 'Brand Strategy', 'Design Org Building', 'C-Suite Communication'] },
+      { level: 1, title: 'Junior UI/UX Designer', yearsExp: '0–2 years', salary: '₹4.5L – ₹7L LPA', description: 'Create simple icons, wireframes, style guides, and assist in user testing.', skills: ['Figma / Sketch', 'Wireframing', 'User Research Basics', 'Visual Design'], checklist: ['Master Figma vector tools', 'Create 20 reusable UI components', 'Conduct 3 heuristic evaluation audits'], project: 'Design a high-fidelity mobile landing page layout in Figma.' },
+      { level: 2, title: 'UI/UX Designer', yearsExp: '2–5 years', salary: '₹7L – ₹14L LPA', description: 'Own product features, coordinate design systems, and run usability tests.', skills: ['Design Systems', 'Prototyping', 'A/B Testing', 'WCAG Accessibility'], checklist: ['Maintain visual design consistency across components', 'Create micro-interaction prototypes', 'Conduct A/B testing on user conversions'], project: 'Design the checkout screen flow for an online commerce app with animations.' },
+      { level: 3, title: 'Senior UX Designer', yearsExp: '5–8 years', salary: '₹14L – ₹25L LPA', description: 'Define the product design framework, lead user journeys, and mentor juniors.', skills: ['Product Strategy', 'UX Writing', 'Interaction Design', 'Stakeholder Pitching'], checklist: ['Build complex user journey flowcharts', 'Align design layouts with engineering requirements', 'Establish project design guidelines'], project: 'Lead user experience design redesign of a dashboard project from research to hi-fi prototypes.' },
+      { level: 4, title: 'Principal Designer', yearsExp: '8–12 years', salary: '₹25L – ₹42L LPA', description: 'Set design directions across multiple teams, build design-thinking cultures.', skills: ['Design Systems at Scale', 'User Research Methodologies', 'Executive Alignment'], checklist: ['Coordinate product branding consistency', 'Introduce organizational design tokens', 'Pitch designs to directors'], project: 'Standardize the design tokens framework of a large enterprise web ecosystem.' },
+      { level: 5, title: 'VP of Design / Chief Design Officer', yearsExp: '12+ years', salary: '₹42L – ₹65L+ LPA', description: 'Shape product brand strategy, direct design organization, and influence company vision.', skills: ['Creative Direction', 'Brand Strategy', 'Design Org Building', 'C-Suite Communication'], checklist: ['Audit creative branding operations', 'Build corporate design strategies', 'Scale design departments'], project: 'Oversee full digital and physical design revamp of a national product brand.' }
     ],
   },
   game: {
@@ -178,18 +607,18 @@ const roadmapData = {
     color: 'green',
     description: 'Create interactive 2D/3D games using modern engine technologies.',
     totalYears: '8–12 years',
-    avgTopSalary: '₹25L - ₹45L LPA',
+    avgTopSalary: '₹25L - ' + '₹45L LPA',
     videoUrl: "https://www.youtube.com/embed/e_yW6rZ_KzY",
     quote: {
       author: "Amit Kumar, Lead Gameplay Programmer at Ubisoft Pune",
       text: "Game development is highly challenging but deeply rewarding. Build small games in Unity or Unreal Engine, upload them to itch.io, and showcase your physics and scripting math skills."
     },
     stages: [
-      { level: 1, title: 'Junior Game Programmer', yearsExp: '0–2 years', salary: '₹4L – ₹7L LPA', description: 'Program simple gameplay triggers, fix UI bugs, and code basic assets.', skills: ['Unity / Unreal Engine', 'C# / C++', 'Game Physics Basics', 'Version Control'] },
-      { level: 2, title: 'Gameplay Developer', yearsExp: '2–5 years', salary: '₹7L – ₹12L LPA', description: 'Write gameplay scripts, customize lighting/shaders, and manage multiplayer states.', skills: ['Gameplay Programming', 'Shader Writing (GLSL)', 'AI Pathfinding', 'Multiplayer Basics'] },
-      { level: 3, title: 'Senior Game Engineer', yearsExp: '5–8 years', salary: '₹12L – ₹22L LPA', description: 'Optimize engine performance, profile memory usage, and build core game loops.', skills: ['Engine Architecture', 'Performance Profiling', 'Console SDKs (PlayStation/Xbox)'] },
-      { level: 4, title: 'Lead Developer / Tech Lead', yearsExp: '8–12 years', salary: '₹22L – ₹35L LPA', description: 'Coordinate engineering squads, handle publisher submissions, and guide coding styles.', skills: ['Team Leadership', 'Project Management', 'Tech Stack Design'] },
-      { level: 5, title: 'Technical Director', yearsExp: '12+ years', salary: '₹35L – ₹55L+ LPA', description: 'Define the studio\'s game engines, lead multi-year title architecture, and budget tech resources.', skills: ['Studio Strategy', 'Technology Selection', 'Publisher Relations', 'Creative Direction'] },
+      { level: 1, title: 'Junior Game Programmer', yearsExp: '0–2 years', salary: '₹4L – ₹7L LPA', description: 'Program simple gameplay triggers, fix UI bugs, and code basic assets.', skills: ['Unity / Unreal Engine', 'C# / C++', 'Game Physics Basics', 'Version Control'], checklist: ['Implement linear movement triggers', 'Resolve collider detection bugs', 'Commit code using Git branches'], project: 'Develop a 2D Platformer game (like Flappy Bird) in Unity.' },
+      { level: 2, title: 'Gameplay Developer', yearsExp: '2–5 years', salary: '₹7L – ₹12L LPA', description: 'Write gameplay scripts, customize lighting/shaders, and manage multiplayer states.', skills: ['Gameplay Programming', 'Shader Writing (GLSL)', 'AI Pathfinding', 'Multiplayer Basics'], checklist: ['Program pathfinding AI for enemies', 'Write custom cell shader materials', 'Set up simple server networking'], project: 'Build a 3D isometric shooter game with basic enemy AI in Unity or Unreal.' },
+      { level: 3, title: 'Senior Game Engineer', yearsExp: '5–8 years', salary: '₹12L – ₹22L LPA', description: 'Optimize engine performance, profile memory usage, and build core game loops.', skills: ['Engine Architecture', 'Performance Profiling', 'Console SDKs (PlayStation/Xbox)'], checklist: ['Identify CPU spikes using Unity Profiler', 'Optimize draw call batches', 'Integrate game console APIs'], project: 'Develop an online multiplayer arena shooter using Mirror/Photon networking.' },
+      { level: 4, title: 'Lead Developer', yearsExp: '8–12 years', salary: '₹22L – ₹35L LPA', description: 'Coordinate engineering squads, handle publisher submissions, and guide coding styles.', skills: ['Team Leadership', 'Project Management', 'Tech Stack Design'], checklist: ['Oversee continuous build runs', 'Coordinate milestone deliverables with publishers', 'Write complex game engine features'], project: 'Direct and release a game title onto Steam or PlayStation Network.' },
+      { level: 5, title: 'Technical Director', yearsExp: '12+ years', salary: '₹35L – ₹55L+ LPA', description: 'Define the technical vision for the entire studio or franchise.', skills: ['Studio Strategy', 'Technology Selection', 'Publisher Relations', 'Creative Direction'], checklist: ['Select company game engine platforms', 'Formulate long-term studio architectures', 'Advise creative leads on feasibility'], project: 'Launch a major AAA studio game title, managing a team of 40+ programmers.' }
     ],
   },
   data: {
@@ -197,18 +626,18 @@ const roadmapData = {
     color: 'amber',
     description: 'Drive data-informed product decisions, analytical frameworks, and ML pipelines.',
     totalYears: '7–11 years',
-    avgTopSalary: '₹45L - ₹75L LPA',
+    avgTopSalary: '₹45L - ' + '₹75L LPA',
     videoUrl: "https://www.youtube.com/embed/KxTLaK41h2I",
     quote: {
       author: "Rashmi Nair, Analytics Director at Swiggy",
       text: "Data science is about solving business problems, not just running code. Learn how to tell a story with data, run clean A/B experiments, and master SQL alongside Python."
     },
     stages: [
-      { level: 1, title: 'Junior Data Analyst', yearsExp: '0–2 years', salary: '₹5.5L – ₹9L LPA', description: 'Clean data, build dashboard trackers, write SQL queries, and make charts.', skills: ['Python / R', 'SQL', 'Tableau / PowerBI', 'Basic Statistics'] },
-      { level: 2, title: 'Data Scientist', yearsExp: '2–5 years', salary: '₹9L – ₹16L LPA', description: 'Train predictive models, run A/B test experiments, and perform feature engineering.', skills: ['Machine Learning', 'A/B Testing', 'Feature Engineering', 'Big Data (Spark)'] },
-      { level: 3, title: 'Senior Data Scientist', yearsExp: '5–8 years', salary: '₹16L – ₹28L LPA', description: 'Lead ML models, perform advanced causal inference, and audit analytics pipelines.', skills: ['Advanced ML', 'Causal Inference', 'MLOps', 'Business Acumen'] },
-      { level: 4, title: 'Analytics Lead / Staff Scientist', yearsExp: '8–12 years', salary: '₹28L – ₹48L LPA', description: 'Set business metrics frameworks, direct org-wide data projects, and mentor junior analysts.', skills: ['Metrics Design', 'Data Governance', 'Executive Presentation'] },
-      { level: 5, title: 'VP of Data Science / CDO', yearsExp: '12+ years', salary: '₹48L – ₹80L+ LPA', description: 'Executive head of data products, privacy compliance, AI monetization, and global data strategy.', skills: ['Data Product Strategy', 'Data Privacy Compliance', 'Board Reporting', 'Business Scaling'] },
+      { level: 1, title: 'Junior Data Analyst', yearsExp: '0–2 years', salary: '₹5.5L – ₹9L LPA', description: 'Clean data, build dashboard trackers, write SQL queries, and make charts.', skills: ['Python / R', 'SQL', 'Tableau / PowerBI', 'Basic Statistics'], checklist: ['Write complex SQL joins and aggregation queries', 'Perform EDA (Exploratory Data Analysis) with pandas', 'Design clear charts in Tableau'], project: 'Build a business analytics dashboard analyzing sales data using Tableau.' },
+      { level: 2, title: 'Data Scientist', yearsExp: '2–5 years', salary: '₹9L – ₹16L LPA', description: 'Train predictive models, run A/B test experiments, and perform feature engineering.', skills: ['Machine Learning', 'A/B Testing', 'Feature Engineering', 'Big Data (Spark)'], checklist: ['Train random forest classification models', 'Analyze A/B test p-values', 'Process millions of rows using Spark datasets'], project: 'Build a churn prediction pipeline using scikit-learn and Flask.' },
+      { level: 3, title: 'Senior Data Scientist', yearsExp: '5–8 years', salary: '₹16L – ₹28L LPA', description: 'Lead ML models, perform advanced causal inference, and audit analytics pipelines.', skills: ['Advanced ML', 'Causal Inference', 'MLOps', 'Business Acumen'], checklist: ['Implement causal inference models', 'Configure automated ML retraining loops', 'Translate business problems to quantitative queries'], project: 'Deploy a price optimization ML model that shifts pricing based on live supply demand.' },
+      { level: 4, title: 'Analytics Lead', yearsExp: '8–12 years', salary: '₹28L – ₹48L LPA', description: 'Set business metrics frameworks, direct org-wide data projects, and mentor junior analysts.', skills: ['Metrics Design', 'Data Governance', 'Executive Presentation'], checklist: ['Establish core company metrics frameworks', 'Write data privacy and retention policies', 'Present insights to VP levels'], project: 'Architect a new company-wide analytics dashboard parsing 100M events per day.' },
+      { level: 5, title: 'VP of Data Science', yearsExp: '12+ years', salary: '₹48L – ₹80L+ LPA', description: 'Executive head of data products, privacy compliance, AI monetization, and global data strategy.', skills: ['Data Product Strategy', 'Data Privacy Compliance', 'Board Reporting', 'Business Scaling'], checklist: ['Manage data science departments', 'Pitch data investments to boards', 'Advise legal teams on model safety compliance'], project: 'Lead the conversion of enterprise data warehouses into real-time transactional data hubs.' }
     ],
   },
 };
@@ -493,51 +922,53 @@ const CareerRoadmap = () => {
       </motion.div>
 
       {/* Media & Community Insights Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-        {/* Day in the Life Video */}
-        <GlassCard className="p-6">
-          <h3 className="text-lg font-bold mb-4 text-slate-900 flex items-center gap-2">
-            <PlayCircle className="text-blue-600" size={20} />
-            Day in the Life of a {data.title}
-          </h3>
-          <div className="aspect-video w-full rounded-xl overflow-hidden border border-slate-200 shadow-inner">
-            <iframe 
-              width="100%" 
-              height="100%" 
-              src={data.videoUrl} 
-              title="YouTube video player" 
-              frameBorder="0" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-              allowFullScreen
-            ></iframe>
-          </div>
-        </GlassCard>
-
-        {/* Professional Story */}
-        <GlassCard className="p-6 flex flex-col justify-between relative overflow-hidden bg-slate-50">
-          <div className="absolute top-0 right-0 p-8 text-slate-100 opacity-20 -z-10">
-            <Quote size={100} />
-          </div>
-          <div>
+      {data.videoUrl && data.quote && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+          {/* Day in the Life Video */}
+          <GlassCard className="p-6">
             <h3 className="text-lg font-bold mb-4 text-slate-900 flex items-center gap-2">
-              <Quote className="text-blue-600" size={20} />
-              Professional Journey Advice
+              <PlayCircle className="text-blue-600" size={20} />
+              Day in the Life of a {data.title}
             </h3>
-            <p className="text-sm italic text-slate-600 leading-relaxed mb-6">
-              "{data.quote.text}"
-            </p>
-          </div>
-          <div className="flex items-center gap-3 border-t border-slate-200 pt-4">
-            <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
-              {data.quote.author.split(' ')[0][0]}{data.quote.author.split(' ')[1] ? data.quote.author.split(' ')[1][0] : ''}
+            <div className="aspect-video w-full rounded-xl overflow-hidden border border-slate-200 shadow-inner">
+              <iframe 
+                width="100%" 
+                height="100%" 
+                src={data.videoUrl} 
+                title="YouTube video player" 
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowFullScreen
+              ></iframe>
+            </div>
+          </GlassCard>
+
+          {/* Professional Story */}
+          <GlassCard className="p-6 flex flex-col justify-between relative overflow-hidden bg-slate-50">
+            <div className="absolute top-0 right-0 p-8 text-slate-100 opacity-20 -z-10">
+              <Quote size={100} />
             </div>
             <div>
-              <div className="text-xs font-bold text-slate-800">{data.quote.author}</div>
-              <div className="text-[10px] text-slate-400 font-medium">Verified Contributor via LinkedIn</div>
+              <h3 className="text-lg font-bold mb-4 text-slate-900 flex items-center gap-2">
+                <Quote className="text-blue-600" size={20} />
+                Professional Journey Advice
+              </h3>
+              <p className="text-sm italic text-slate-600 leading-relaxed mb-6">
+                "{data.quote.text}"
+              </p>
             </div>
-          </div>
-        </GlassCard>
-      </div>
+            <div className="flex items-center gap-3 border-t border-slate-200 pt-4">
+              <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
+                {data.quote.author.split(' ')[0][0]}{data.quote.author.split(' ')[1] ? data.quote.author.split(' ')[1][0] : ''}
+              </div>
+              <div>
+                <div className="text-xs font-bold text-slate-800">{data.quote.author}</div>
+                <div className="text-[10px] text-slate-400 font-medium">Verified Contributor via LinkedIn</div>
+              </div>
+            </div>
+          </GlassCard>
+        </div>
+      )}
 
       {/* Roadmap Steps */}
       <div className="relative">
@@ -570,13 +1001,39 @@ const CareerRoadmap = () => {
                     </div>
                     <p className="text-slate-500 text-sm mb-4">{stage.description}</p>
 
+                    {/* Detailed learning path (Checklist & Projects) */}
+                    {stage.checklist && stage.project && (
+                      <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-6 text-xs mb-4">
+                        <div>
+                          <h4 className="font-bold text-slate-800 mb-2 flex items-center gap-1.5 uppercase tracking-wider text-[10px]">
+                            <CheckCircle2 size={12} className="text-blue-500" />
+                            Core Learning Checklist
+                          </h4>
+                          <ul className="list-disc pl-4 space-y-1 text-slate-500 font-medium">
+                            {stage.checklist.map((item, idx) => (
+                              <li key={idx} className="leading-relaxed">{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-slate-800 mb-2 flex items-center gap-1.5 uppercase tracking-wider text-[10px]">
+                            <Code size={12} className="text-green-500" />
+                            Hands-On Project To Build
+                          </h4>
+                          <div className="bg-slate-50 border border-slate-150 rounded-xl p-3 text-slate-600 font-medium leading-relaxed shadow-sm">
+                            {stage.project}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Skills */}
                     <div className="flex flex-wrap gap-2">
                       {stage.skills.map(skill => (
                         <button
                           key={skill}
                           onClick={() => handleStartQuiz(skill)}
-                          className="text-xs bg-slate-50 hover:bg-blue-100 hover:text-blue-700 hover:border-blue-300 border border-slate-200 text-slate-600 px-3 py-1.5 rounded-full transition-all cursor-pointer flex items-center gap-1.5 font-medium active:scale-95"
+                          className="text-xs bg-slate-50 hover:bg-blue-100 hover:text-blue-700 hover:border-blue-300 border border-slate-200 text-slate-600 px-3 py-1.5 rounded-full transition-all cursor-pointer flex items-center gap-1.5 font-medium active:scale-95 shadow-sm"
                           title="Click to take an AI Skill Test!"
                         >
                           <Sparkles size={11} className="text-blue-500 animate-pulse" />

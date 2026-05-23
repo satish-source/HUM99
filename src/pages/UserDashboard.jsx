@@ -182,7 +182,14 @@ const UserDashboard = () => {
                   <label className="block text-sm text-slate-500 mb-2">Academic Stage</label>
                   <select 
                     value={editForm.grade || ''}
-                    onChange={(e) => setEditForm({...editForm, grade: e.target.value})}
+                    onChange={(e) => {
+                      const newGrade = e.target.value;
+                      setEditForm({
+                        ...editForm,
+                        grade: newGrade,
+                        stream: newGrade === 'Class 10' ? 'All' : (editForm.stream === 'All' ? '' : editForm.stream)
+                      });
+                    }}
                     className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-slate-800 focus:outline-none focus:border-primary font-medium"
                   >
                     <option value="">Select Stage</option>
@@ -192,17 +199,25 @@ const UserDashboard = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-500 mb-2">Stream Interest</label>
-                  <select 
-                    value={editForm.stream || ''}
-                    onChange={(e) => setEditForm({...editForm, stream: e.target.value})}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-slate-800 focus:outline-none focus:border-primary font-medium"
-                  >
-                    <option value="">Select Stream</option>
-                    <option value="Science">Science (PCM / PCB)</option>
-                    <option value="Commerce">Commerce</option>
-                    <option value="Arts & Design">Arts & Design</option>
-                  </select>
+                  {editForm.grade === 'Class 10' ? (
+                    <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-xl text-indigo-700 text-xs font-semibold leading-relaxed">
+                      Stream is set to <strong className="text-indigo-900">All Streams / Deciding</strong> automatically for Class 10 students to maximize career exploration.
+                    </div>
+                  ) : (
+                    <>
+                      <label className="block text-sm text-slate-500 mb-2">Stream Interest</label>
+                      <select 
+                        value={editForm.stream || ''}
+                        onChange={(e) => setEditForm({...editForm, stream: e.target.value})}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-slate-800 focus:outline-none focus:border-primary font-medium"
+                      >
+                        <option value="">Select Stream</option>
+                        <option value="Science">Science (PCM / PCB)</option>
+                        <option value="Commerce">Commerce</option>
+                        <option value="Arts & Design">Arts & Design</option>
+                      </select>
+                    </>
+                  )}
                 </div>
                 
                 <button 
