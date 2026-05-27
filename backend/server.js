@@ -96,9 +96,9 @@ const Profile = mongoose.model('Profile', profileSchema);
 
 
 
-// Basic route
-app.get('/', (req, res) => {
-  res.send('Hello from HUM99 Backend!');
+// Basic api status check
+app.get('/api/status', (req, res) => {
+  res.json({ status: 'online', database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected' });
 });
 
 // Get all data
@@ -420,6 +420,16 @@ app.post('/api/quiz/career-match', async (req, res) => {
   }
 });
 
+
+const path = require('path');
+
+// Serve static assets from the frontend build folder
+app.use(express.static(path.join(__dirname, '../dist')));
+
+// Fallback for Single Page Application (SPA) routing
+app.get(/.*/, (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
+});
 
 // Start server
 app.listen(PORT, () => {
