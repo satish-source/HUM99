@@ -4,15 +4,17 @@ import { TypeAnimation } from 'react-type-animation';
 import NeonButton from '../components/NeonButton';
 import GlassCard from '../components/GlassCard';
 import AnimatedSection from '../components/AnimatedSection';
-import { Brain, Code, Shield, Sparkles, TrendingUp, Users, ArrowRight, UserCheck, BookOpen, GraduationCap, Cloud, Palette, X, Layers, Clock, Briefcase, PlayCircle } from 'lucide-react';
+import { Brain, Code, Shield, Sparkles, TrendingUp, Users, ArrowRight, UserCheck, BookOpen, GraduationCap, Cloud, Palette, X, Layers, Clock, Briefcase, PlayCircle, Target } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Landing = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState(1);
   const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedStream, setSelectedStream] = useState('');
+  const [selectedGoal, setSelectedGoal] = useState('');
   const [savingOnboarding, setSavingOnboarding] = useState(false);
   const [activeTrendingCourse, setActiveTrendingCourse] = useState(null);
 
@@ -36,21 +38,21 @@ const Landing = () => {
   }, []);
 
   const handleSaveOnboarding = async () => {
-    if (!selectedGrade || !selectedStream) return;
+    if (!selectedGrade || !selectedStream || !selectedGoal) return;
     setSavingOnboarding(true);
     try {
       const apiBaseUrl = import.meta.env.VITE_API_URL || '';
       const response = await fetch(`${apiBaseUrl}/api/profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ grade: selectedGrade, stream: selectedStream })
+        body: JSON.stringify({ grade: selectedGrade, stream: selectedStream, goal: selectedGoal })
       });
       if (response.ok) {
         const updated = await response.json();
         setProfile(updated);
         setShowOnboarding(false);
         // Direct route to explorer based on onboarding selection
-        navigate(`/explorer?stage=${encodeURIComponent(selectedGrade)}`);
+        navigate(`/explorer?stage=${encodeURIComponent(selectedGrade)}&stream=${encodeURIComponent(selectedStream)}`);
       }
     } catch (err) {
       console.error('Error saving onboarding:', err);
@@ -143,87 +145,63 @@ const Landing = () => {
         </motion.div>
       )}
 
-      {/* Onboarding Dialog */}
       <AnimatePresence>
         {showOnboarding && (
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="w-full max-w-4xl mt-8"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 15 }}
+            className="w-full max-w-2xl mt-8"
           >
             <GlassCard className="border-blue-200 bg-blue-50/50 p-8 relative overflow-hidden shadow-lg">
               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-300/10 rounded-full blur-3xl -z-10" />
               
-              <h2 className="text-2xl font-bold mb-2 flex items-center gap-2 text-slate-900">
-                <UserCheck className="text-blue-600" size={24} />
-                Personalize Your Career Journey
-              </h2>
-              <p className="text-sm text-slate-500 mb-6">
-                Tell us your current academic stage to unlock custom salary ranges, entrance exam trackers, and roadmap matching for the Indian context.
-              </p>
+              {/* Step indicator bar */}
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold flex items-center gap-2 text-slate-900">
+                  <UserCheck className="text-blue-600" size={24} />
+                  Personalize CareerVerse
+                </h2>
+                <span className="text-xs font-bold bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                  Step {onboardingStep} of 3
+                </span>
+              </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                {/* Academic Stage */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                    <GraduationCap size={16} className="text-blue-600" />
-                    1. What is your current academic stage?
-                  </label>
-                  <div className="flex flex-col gap-2.5">
-                    {[
-                      { key: 'Class 10', label: 'Class 10 (Deciding Stream)' },
-                      { key: 'Class 12', label: 'Class 12 (Preparing for College)' },
-                      { key: 'College Student', label: 'College Student / Graduate' }
-                    ].map(item => (
-                      <button
-                        key={item.key}
-                        onClick={() => {
-                          setSelectedGrade(item.key);
-                          if (item.key === 'Class 10') {
-                            setSelectedStream('All');
-                          } else if (selectedStream === 'All') {
-                            setSelectedStream('');
-                          }
-                        }}
-                        className={`text-left p-3.5 rounded-xl border text-sm font-semibold transition-all ${
-                          selectedGrade === item.key 
-                            ? 'bg-blue-100 border-blue-500 text-blue-800' 
-                            : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-600'
-                        }`}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+              {/* Step progress bar */}
+              <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-8">
+                <div 
+                  className="h-full bg-blue-600 transition-all duration-300" 
+                  style={{ width: `${(onboardingStep / 3) * 100}%` }}
+                />
+              </div>
 
-                {/* Stream Interest */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                    <BookOpen size={16} className="text-blue-600" />
-                    2. Select your stream / field of interest:
-                  </label>
-                  {selectedGrade === 'Class 10' ? (
-                    <div className="flex flex-col justify-center items-center h-full text-center p-6 bg-indigo-50 border border-dashed border-indigo-200 rounded-xl min-h-[160px]">
-                      <Sparkles className="text-indigo-600 mb-2 animate-pulse" size={28} />
-                      <span className="text-sm font-bold text-indigo-900">Explore All Streams</span>
-                      <p className="text-xs text-indigo-600/80 mt-1 max-w-[280px]">
-                        Class 10 students explore Science, Commerce, and Arts paths together to make the best stream choice.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-2.5">
+              {/* Quiz steps */}
+              <div className="min-h-[220px] mb-8">
+                {onboardingStep === 1 && (
+                  <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
+                    <label className="block text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                      <GraduationCap className="text-blue-600" size={20} />
+                      Which academic stage are you in currently?
+                    </label>
+                    <div className="flex flex-col gap-3">
                       {[
-                        { key: 'Science', label: 'Science (PCM / PCB)' },
-                        { key: 'Commerce', label: 'Commerce (Finance / Business)' },
-                        { key: 'Arts & Design', label: 'Arts & Humanities / Design' }
+                        { key: 'Class 10', label: 'Class 10 (Deciding Stream)' },
+                        { key: 'Class 12', label: 'Class 12 (Preparing for College)' },
+                        { key: 'College Student', label: 'College Student / Graduate' }
                       ].map(item => (
                         <button
                           key={item.key}
-                          onClick={() => setSelectedStream(item.key)}
-                          className={`text-left p-3.5 rounded-xl border text-sm font-semibold transition-all ${
-                            selectedStream === item.key 
-                              ? 'bg-blue-100 border-blue-500 text-blue-800' 
+                          onClick={() => {
+                            setSelectedGrade(item.key);
+                            if (item.key === 'Class 10') {
+                              setSelectedStream('All');
+                            } else if (selectedStream === 'All') {
+                              setSelectedStream('');
+                            }
+                          }}
+                          className={`text-left p-4 rounded-xl border text-sm font-semibold transition-all shadow-sm ${
+                            selectedGrade === item.key 
+                              ? 'bg-blue-100 border-blue-500 text-blue-800 shadow-md scale-[1.01]' 
                               : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-600'
                           }`}
                         >
@@ -231,18 +209,107 @@ const Landing = () => {
                         </button>
                       ))}
                     </div>
-                  )}
-                </div>
+                  </motion.div>
+                )}
+
+                {onboardingStep === 2 && (
+                  <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
+                    <label className="block text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                      <BookOpen className="text-blue-600" size={20} />
+                      Select your stream or area of interest:
+                    </label>
+                    {selectedGrade === 'Class 10' ? (
+                      <div className="flex flex-col justify-center items-center text-center p-8 bg-indigo-50 border border-dashed border-indigo-200 rounded-2xl min-h-[160px]">
+                        <Sparkles className="text-indigo-600 mb-2 animate-pulse" size={32} />
+                        <span className="text-sm font-bold text-indigo-900">Explore All Streams</span>
+                        <p className="text-xs text-indigo-600 mt-1.5 max-w-[340px] leading-relaxed">
+                          For Class 10 students, we showcase Science, Commerce, and Arts paths side-by-side to assist in making the optimal stream choice.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-3">
+                        {[
+                          { key: 'Science', label: 'Science (PCM / PCB)' },
+                          { key: 'Commerce', label: 'Commerce (Finance / Business)' },
+                          { key: 'Arts & Design', label: 'Arts & Humanities / Design' }
+                        ].map(item => (
+                          <button
+                            key={item.key}
+                            onClick={() => setSelectedStream(item.key)}
+                            className={`text-left p-4 rounded-xl border text-sm font-semibold transition-all shadow-sm ${
+                              selectedStream === item.key 
+                                ? 'bg-blue-100 border-blue-500 text-blue-800 shadow-md scale-[1.01]' 
+                                : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-600'
+                            }`}
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+
+                {onboardingStep === 3 && (
+                  <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}>
+                    <label className="block text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                      <Target className="text-blue-600" size={20} />
+                      What is your primary career or learning goal?
+                    </label>
+                    <div className="flex flex-col gap-3">
+                      {[
+                        { key: 'Choose Stream', label: 'Choose the Right Stream (Class 10)' },
+                        { key: 'Choose College', label: 'Select Best College & Exams (Class 12)' },
+                        { key: 'Choose Career', label: 'Explore High-Paying Career Options' },
+                        { key: 'Get a Job', label: 'Acquire Practical Skills & Get a Job' }
+                      ].map(item => (
+                        <button
+                          key={item.key}
+                          onClick={() => setSelectedGoal(item.key)}
+                          className={`text-left p-4 rounded-xl border text-sm font-semibold transition-all shadow-sm ${
+                            selectedGoal === item.key 
+                              ? 'bg-blue-100 border-blue-500 text-blue-800 shadow-md scale-[1.01]' 
+                              : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-600'
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
               </div>
 
-              <div className="flex justify-end">
+              {/* Navigation controls */}
+              <div className="flex justify-between items-center pt-4 border-t border-slate-200/60">
                 <button
-                  onClick={handleSaveOnboarding}
-                  disabled={!selectedGrade || !selectedStream || savingOnboarding}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-md disabled:opacity-50 text-sm"
+                  type="button"
+                  disabled={onboardingStep === 1}
+                  onClick={() => setOnboardingStep(prev => prev - 1)}
+                  className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-500 font-bold text-xs rounded-xl transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  {savingOnboarding ? 'Saving Preference...' : 'Apply Personalization'}
+                  Back
                 </button>
+                
+                {onboardingStep < 3 ? (
+                  <button
+                    type="button"
+                    disabled={(onboardingStep === 1 && !selectedGrade) || (onboardingStep === 2 && !selectedStream)}
+                    onClick={() => setOnboardingStep(prev => prev + 1)}
+                    className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={!selectedGoal || savingOnboarding}
+                    onClick={handleSaveOnboarding}
+                    className="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    {savingOnboarding ? 'Personalizing...' : 'Complete Setup 🎉'}
+                  </button>
+                )}
               </div>
             </GlassCard>
           </motion.div>
@@ -295,7 +362,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Entry Point Grid */}
+      {/* Curated Entry Points Stage Cards */}
       <AnimatedSection className="w-full my-10 max-w-5xl">
         <h2 className="text-3xl font-bold text-center mb-8">Curated entry points for your <span className="neon-text">current stage</span></h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -318,6 +385,27 @@ const Landing = () => {
             </GlassCard>
           ))}
         </div>
+      </AnimatedSection>
+
+      {/* AI Career Match Quiz Banner */}
+      <AnimatedSection className="w-full my-6 max-w-5xl">
+        <GlassCard className="bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-violet-600/10 border-blue-200/50 p-8 flex flex-col md:flex-row justify-between items-center gap-6 shadow-md hover:shadow-lg transition-all">
+          <div className="flex-1">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold mb-3">
+              <Sparkles size={12} className="animate-spin-slow" /> New AI Feature
+            </span>
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">Unsure of your direction? Take our 60s AI Career Match Quiz</h3>
+            <p className="text-sm text-slate-500 leading-relaxed max-w-xl">
+              Answer 10 simple questions about your favorite subjects, interests, and working styles. Our AI will compute your compatibility scores and generate a custom fit report.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/explorer?quiz=true')}
+            className="px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-md active:scale-95 text-sm whitespace-nowrap shrink-0 flex items-center gap-2"
+          >
+            Start Career Quiz <ArrowRight size={16} />
+          </button>
+        </GlassCard>
       </AnimatedSection>
 
       {/* Stats Section */}
@@ -463,7 +551,7 @@ const Landing = () => {
                         ))}
                       </div>
 
-                      <div className="p-4 bg-green-50/50 border border-green-150 rounded-xl mb-6">
+                      <div className="p-4 bg-green-50/50 border border-green-200 rounded-xl mb-6">
                         <h5 className="font-bold text-green-800 text-xs uppercase tracking-wider mb-1 flex items-center gap-1.5">
                           <Code size={14} /> Real-World Capstone Project
                         </h5>

@@ -201,7 +201,7 @@ const Roadmap = () => {
           return (
             <AnimatedSection key={roadmap.id} delay={index * 0.05}>
               <GlassCard className="h-full flex flex-col justify-between hover:shadow-md transition-shadow border-slate-200 relative group">
-                <div className="absolute top-4 right-4 text-slate-350 opacity-20 group-hover:opacity-40 transition-opacity">
+                <div className="absolute top-4 right-4 text-slate-400 opacity-20 group-hover:opacity-40 transition-opacity">
                   {roadmap.icon}
                 </div>
                 <div>

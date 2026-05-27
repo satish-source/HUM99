@@ -1,6 +1,6 @@
 import { Outlet, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BrainCircuit, Compass, BarChart2, LayoutDashboard, User } from 'lucide-react';
+import { BrainCircuit, Compass, BarChart2, User, TrendingUp, MessageSquare } from 'lucide-react';
 
 const MainLayout = () => {
   return (
@@ -13,20 +13,29 @@ const MainLayout = () => {
       <div className="fixed inset-0 z-0 bg-slate-50/90 backdrop-blur-sm"></div>
       
       {/* Floating Navbar */}
-      <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-[90%] max-w-5xl z-50 glass-panel px-6 py-4 flex justify-between items-center bg-white shadow-sm border border-slate-200 rounded-full">
+      <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-5xl z-50 glass-panel px-6 py-4 flex justify-between items-center bg-white shadow-sm border border-slate-200 rounded-full">
         <Link to="/" className="text-2xl font-bold text-primary flex items-center gap-2">
           <BrainCircuit className="text-primary" />
           CareerVerse
         </Link>
-        <div className="hidden md:flex gap-6 items-center font-medium text-slate-600">
-          <Link to="/explorer" className="hover:text-primary transition-colors flex items-center gap-2">
-            <Compass size={18} /> Explorer
+        <div className="hidden md:flex gap-5 items-center font-medium text-slate-600 text-sm">
+          <Link to="/explorer" className="hover:text-primary transition-colors flex items-center gap-1.5">
+            <Compass size={17} /> Explorer
           </Link>
-          <Link to="/roadmap" className="hover:text-primary transition-colors flex items-center gap-2">
-            <BarChart2 size={18} /> Roadmap
+          <Link to="/roadmap" className="hover:text-primary transition-colors flex items-center gap-1.5">
+            <BarChart2 size={17} /> Roadmap
           </Link>
-          <Link to="/dashboard" className="hover:text-primary transition-colors flex items-center gap-2">
-            <User size={18} /> Profile
+          <Link to="/comparison" className="hover:text-primary transition-colors flex items-center gap-1.5">
+            <TrendingUp size={17} /> Compare
+          </Link>
+          <Link to="/mentor" className="hover:text-primary transition-colors flex items-center gap-1.5">
+            <MessageSquare size={17} /> AI Mentor
+          </Link>
+          <Link to="/trends" className="hover:text-primary transition-colors flex items-center gap-1.5">
+            <TrendingUp size={17} /> Insights
+          </Link>
+          <Link to="/dashboard" className="hover:text-primary transition-colors flex items-center gap-1.5">
+            <User size={17} /> Profile
           </Link>
         </div>
       </nav>

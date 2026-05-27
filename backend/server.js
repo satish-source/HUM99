@@ -12,7 +12,7 @@ try {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   aiModel = genAI.getGenerativeModel({ 
     model: 'gemini-2.5-flash',
-    systemInstruction: "You are Nova AI Mentor, a helpful AI assistant for programming and career guidance. Respond conversationally like ChatGPT. For programming questions, provide code solutions and explanations."
+    systemInstruction: "You are Nova AI Mentor, a helpful AI career counselor tailored for Indian students (ages 14 to 25). Respond conversationally and warmly. Focus on competitive exams (like JEE, NEET, UPSC, CAT, CLAT, CUET, GATE, NDA), top Indian institutions (IITs, NITs, BITS, IIMs, NLUs, central universities), career paths in India, and average salary packages in Rupees (LPA). Provide clear, actionable advice, and explain technical programming concepts or code when asked."
   });
 } catch (err) {
   console.warn('Gemini initialization warning:', err.message);
@@ -23,10 +23,41 @@ app.use(cors());
 app.use(express.json());
 
 // Connect to MongoDB
-const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/hum99';
+let mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/hum99';
+
+// Ensure the Atlas URI includes a database name (append 'hum99' before query params if missing)
+if (mongoURI.includes('mongodb+srv://') || mongoURI.includes('mongodb://')) {
+  try {
+    const url = new URL(mongoURI);
+    // If pathname is just '/' (no database specified), add 'hum99'
+    if (!url.pathname || url.pathname === '/') {
+      url.pathname = '/hum99';
+      mongoURI = url.toString();
+    }
+  } catch (e) {
+    console.warn('Could not parse MongoDB URI to inject db name:', e.message);
+  }
+}
+
 mongoose.connect(mongoURI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+  .then(() => console.log('Connected to MongoDB successfully'))
+  .catch(err => {
+    console.error('MongoDB connection error:', err.message);
+    console.error('Full error:', err);
+    console.error('\nTroubleshooting tips:');
+    console.error('  1. Ensure your MongoDB Atlas cluster is running');
+    console.error('  2. Whitelist your current IP address in Atlas: Network Access > Add IP Address > Add Current IP');
+    console.error('  3. Verify your username and password in the .env file');
+    console.error('  4. Check that the connection string is correctly formatted');
+  });
+
+mongoose.connection.on('error', err => {
+  console.error('MongoDB runtime error:', err.message);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.warn('MongoDB disconnected. Attempting to reconnect...');
+});
 
 
 // Define a schema and model
@@ -58,7 +89,8 @@ const profileSchema = new mongoose.Schema({
   },
   unlockedBadges: { type: [String], default: ["1", "2", "3"] },
   grade: { type: String, default: "" },
-  stream: { type: String, default: "" }
+  stream: { type: String, default: "" },
+  goal: { type: String, default: "" }
 });
 const Profile = mongoose.model('Profile', profileSchema);
 
@@ -315,6 +347,75 @@ app.post('/api/quiz/generate', async (req, res) => {
     }
   } catch (err) {
     console.error('Quiz generation error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+// AI Career Match Quiz endpoint
+app.post('/api/quiz/career-match', async (req, res) => {
+  try {
+    const { answers } = req.body;
+    
+    if (!answers || !Array.isArray(answers) || answers.length === 0) {
+      return res.status(400).json({ error: 'Answers array is required.' });
+    }
+
+    const prompt = `You are an expert career counselor. Analyze the student's responses to a 10-question career assessment quiz and calculate a match score (from 0 to 100) for each of these 13 career path IDs:
+    - foundation-cs (Foundations of Computer Science)
+    - foundation-finance (Financial Literacy & Banking)
+    - foundation-design (Introduction to Visual Design)
+    - btech-cse (B.Tech Computer Science)
+    - bca (Bachelor of Computer Applications)
+    - bdes (Bachelor of Design)
+    - swe (Software Engineer)
+    - ai (AI Engineer)
+    - cyber (Cybersecurity Analyst)
+    - cloud (Cloud Architect)
+    - ux (UI/UX Designer)
+    - game (Game Developer)
+    - data (Data Scientist)
+
+    Student Quiz Responses:
+    ${JSON.stringify(answers, null, 2)}
+
+    Provide a percentage match score (0-100) for each of the 13 paths. Also identify the single top career match ID and write a 2-sentence personalized explanation of why it fits their profile.
+
+    Return ONLY a raw JSON object. No markdown formatting, no code blocks, no trailing comments. Example structure:
+    {
+      "scores": {
+        "foundation-cs": 60,
+        "foundation-finance": 40,
+        "foundation-design": 30,
+        "btech-cse": 75,
+        "bca": 65,
+        "bdes": 40,
+        "swe": 85,
+        "ai": 90,
+        "cyber": 50,
+        "cloud": 70,
+        "ux": 35,
+        "game": 55,
+        "data": 80
+      },
+      "topCareerId": "ai",
+      "explanation": "Your strong programming affinity, combined with your fascination for generative models and automation, makes AI Engineering your ideal career pathway. You will excel in designing neural networks and working on cutting-edge machine learning solutions."
+    }`;
+
+    if (aiModel) {
+      try {
+        const geminiResponse = await aiModel.generateContent(prompt);
+        let rawText = geminiResponse.response.text();
+        rawText = rawText.replace(/```json|```/g, '').trim();
+        const responseJson = JSON.parse(rawText);
+        res.json(responseJson);
+      } catch (geminiErr) {
+        console.error('Gemini Career Matcher Error:', geminiErr.message);
+        throw new Error('Failed to compute career matches via Gemini: ' + geminiErr.message);
+      }
+    } else {
+      throw new Error('AI Model is not initialized.');
+    }
+  } catch (err) {
+    console.error('Career match error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });

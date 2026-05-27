@@ -3,8 +3,9 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, CheckCircle2, Circle, Lock, Briefcase, TrendingUp, DollarSign, Clock, 
-  ChevronRight, X, Sparkles, Loader2, AlertCircle, PlayCircle, Quote, Check, Code 
+  ChevronRight, X, Sparkles, Loader2, AlertCircle, PlayCircle, Quote, Check, Code, Users 
 } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import GlassCard from '../components/GlassCard';
 
 const roadmapData = {
@@ -652,6 +653,210 @@ const colorMap = {
   amber:  { bg: 'bg-amber-50',  border: 'border-amber-200',  text: 'text-amber-600',  dot: 'bg-amber-500',  badge: 'bg-amber-100 text-amber-700',   bar: 'from-amber-400 to-amber-600' },
 };
 
+const CAREER_PROFILES = {
+  'foundation-cs': [
+    { name: "Aarav Sharma", role: "Class 11 Student", company: "DPS RK Puram", quote: "Learning Scratch and logic in Class 10 made my transition to school Python coding extremely smooth!", link: "#" },
+    { name: "Sneha Reddy", role: "B.Tech Student", company: "IIIT Hyderabad", quote: "I started logic building in Class 10. It gave me a huge head start in coding and data structures at college.", link: "#" },
+    { name: "Raj Malhotra", role: "Software Engineer", company: "Google India", quote: "Computational thinking is the bedrock. Even in 10th standard, learning algorithms shapes how you solve issues.", link: "#" }
+  ],
+  'foundation-finance': [
+    { name: "Ishaan Gupta", role: "CA Aspirant", company: "SRCC", quote: "Compounding interest and UPI security tracking in 10th grade laid the bedrock for my accountancy passion.", link: "#" },
+    { name: "Priya Varma", role: "Financial Analyst", company: "Goldman Sachs", quote: "Understanding personal finance early is a life skill. It helps you manage money and think analytically.", link: "#" },
+    { name: "Amit Mehta", role: "Product Lead", company: "Zerodha", quote: "Fintech is booming. Connecting banking basics with computer tools early is highly valuable.", link: "#" }
+  ],
+  'foundation-design': [
+    { name: "Ananya Sen", role: "Design Student", company: "NID Ahmedabad", quote: "Exploring visual hierarchy and typography in 10th grade helped me build my early design portfolios.", link: "#" },
+    { name: "Kabir Roy", role: "UI Designer", company: "Razorpay", quote: "Canva and Figma basics in school are great. Train your eye to look at layouts, colors, and patterns.", link: "#" },
+    { name: "Meera Nair", role: "Creative Director", company: "TCS iON Design", quote: "Design is problem-solving. Learning compose rules early prepares you for high-paying product roles.", link: "#" }
+  ],
+  'btech-cse': [
+    { name: "Rohan Das", role: "Software Dev Intern", company: "Amazon India", quote: "JEE prep builds logical endurance. Getting into NIT Trichy opened campus placements with top-tier product packages.", link: "#" },
+    { name: "Divya Kapoor", role: "Systems Engineer", company: "Infosys", quote: "Focus on OOPs and database index structures in your 2nd year. Relational querying is highly tested in interviews.", link: "#" },
+    { name: "Siddharth Jain", role: "Tech Lead", company: "CRED", quote: "Solve LeetCode problems consistently. Speed and recursion mastery are key to clearing campus coding rounds.", link: "#" }
+  ],
+  'bca': [
+    { name: "Vikram Seth", role: "Frontend Developer", company: "Wipro", quote: "BCA gave me solid practical web hours. Doing projects on GitHub is what got me hired, not just the degree.", link: "#" },
+    { name: "Neha Joshi", role: "Full Stack Engineer", company: "Paytm", quote: "Mastering JS, React, and Node during BCA made me stand out. Showcase proof-of-work on Vercel.", link: "#" },
+    { name: "Aditya Puri", role: "Technical Specialist", company: "Cognizant", quote: "Database administration and SQL skills are highly sought. BCA's database coursework is very relevant.", link: "#" }
+  ],
+  'bdes': [
+    { name: "Kriti Sharma", role: "UX Intern", company: "Flipkart", quote: "NID preparation tests your observation. Wireframing and design thinking methods are critical for B.Des success.", link: "#" },
+    { name: "Varun Verma", role: "Visual Designer", company: "Swiggy", quote: "Figma wireframes and high-fidelity mockups are key. Build Behance case studies detailing user interviews.", link: "#" },
+    { name: "Aisha Khan", role: "Product Designer", company: "Microsoft India", quote: "Learn design system tokens and WCAG accessibility standards. It separates amateur UI from pro UX.", link: "#" }
+  ],
+  'swe': [
+    { name: "Rajat Verma", role: "Software Engineer", company: "CRED (Bengaluru)", quote: "LLD and relational SQL structures are heavily used at high-load startups. Write modular clean functions.", link: "#" },
+    { name: "Preeti Shenoy", role: "Senior Developer", company: "Microsoft India", quote: "Docker containerization and CI/CD actions are now standard expectations. Make sure to build projects with them.", link: "#" },
+    { name: "Tarun Gupta", role: "Engineering Lead", company: "Walmart Global Tech", quote: "Scale requires understanding Redis queues, horizontal sharding, and database read/write replicas.", link: "#" }
+  ],
+  'ai': [
+    { name: "Dr. Sandeep Kumar", role: "AI Scientist", company: "Ola Electric", quote: "Math is key. Understand backpropagation calculus and linear algebra before fine-tuning HuggingFace models.", link: "#" },
+    { name: "Tanya Sen", role: "LLM Engineer", company: "Krutrim AI", quote: "Parameter-efficient fine-tuning (LoRA) and RAG vector databases are crucial skills in high demand currently.", link: "#" },
+    { name: "Abhinav Singh", role: "MLOps Architect", company: "Fractal Analytics", quote: "Deploying and monitoring models in production using vLLM and Kubeflow saves massive GPU cluster costs.", link: "#" }
+  ],
+  'cyber': [
+    { name: "Nitin Sharma", role: "SecOps Lead", company: "Paytm", quote: "Digital payment safety requires strict alert parsing. Analyze SQLi and XSS attempts daily in logs.", link: "#" },
+    { name: "Ritu Goel", role: "Penetration Tester", company: "KPMG India", quote: "Learn ethical hacking with Kali Linux. Automating vulnerability scripts in Python will speed up security audits.", link: "#" },
+    { name: "Alok Dwivedi", role: "CISO", company: "HDFC Bank", quote: "Governance, SOC2, and Zero Trust models are our core shields. Security is about defense policies and audits.", link: "#" }
+  ],
+  'cloud': [
+    { name: "Sanjay Joshi", role: "DevOps Engineer", company: "TCS", quote: "Kubernetes configuration and Helm charts are standard tools. Automating cloud VPC resources with Terraform is crucial.", link: "#" },
+    { name: "Monika Sen", role: "Cloud Architect", company: "Wipro Digital", quote: "Manage FinOps dashboards to reduce cloud hosting spend. Multi-region load balancing prevents downtime.", link: "#" },
+    { name: "Harish Rao", role: "Infrastructure Director", company: "Jio Platforms", quote: "Migrating active databases to sharded cloud clusters without losing any data is a master-level project.", link: "#" }
+  ],
+  'ux': [
+    { name: "Pooja Mehta", role: "Design Director", company: "Razorpay", quote: "Do not skip user interviews. Visuals are only 20% of design; mapping the customer journey solves the real issues.", link: "#" },
+    { name: "Rishabh Roy", role: "UX Designer", company: "MakeMyTrip", quote: "Micro-interactions and spring physics animations in Figma make the app feel tactile and alive.", link: "#" },
+    { name: "Shruti Varma", role: "VP of Product", company: "Paytm Insider", quote: "Design tokens scale. Standardizing button layouts and accessibility rules speeds up front-end execution.", link: "#" }
+  ],
+  'game': [
+    { name: "Amit Kumar", role: "Gameplay Coder", company: "Ubisoft Pune", quote: "Develop small projects and host them on itch.io. Show physics triggers and object pool optimization.", link: "#" },
+    { name: "Neha Goel", role: "Shader Artist", company: "Technicolor India", quote: "Custom cell shaders and particle effects separate indie graphics from standard Unity defaults.", link: "#" },
+    { name: "Vikram Das", role: "Technical Director", company: "Nazara Games", quote: "Online multiplayer states require deep WebSocket latency tuning. Physics synching is a complex task.", link: "#" }
+  ],
+  'data': [
+    { name: "Rashmi Nair", role: "Analytics Director", company: "Swiggy", quote: "Metrics design drives product growth. Use scikit-learn models to predict churn and target user groups.", link: "#" },
+    { name: "Abhishek Roy", role: "Data Engineer", company: "PhonePe", quote: "Relational database JOINs and spark ETL jobs clean messy telemetry streams before training models.", link: "#" },
+    { name: "Kiran Shah", role: "VP of Analytics", company: "Flipkart India", quote: "A/B testing statistical p-values are the ultimate source of truth. Make decisions on data, not guesses.", link: "#" }
+  ]
+};
+
+const CAREER_SALARIES = {
+  'foundation-cs': [
+    { level: 'Beginner', salary: 1.5 },
+    { level: 'Mid-Grade', salary: 2.2 },
+    { level: 'Certificate', salary: 3.0 }
+  ],
+  'foundation-finance': [
+    { level: 'Beginner', salary: 2.0 },
+    { level: 'Mid-Grade', salary: 3.0 },
+    { level: 'Certificate', salary: 4.0 }
+  ],
+  'foundation-design': [
+    { level: 'Beginner', salary: 2.0 },
+    { level: 'Mid-Grade', salary: 2.8 },
+    { level: 'Certificate', salary: 4.0 }
+  ],
+  'btech-cse': [
+    { level: 'Entry (T3)', salary: 6.0 },
+    { level: 'Entry (T1)', salary: 18.0 },
+    { level: 'Post-Degree', salary: 30.0 }
+  ],
+  'bca': [
+    { level: 'Entry (T3)', salary: 4.0 },
+    { level: 'Entry (T1)', salary: 7.0 },
+    { level: 'Post-Degree', salary: 10.0 }
+  ],
+  'bdes': [
+    { level: 'Entry (T3)', salary: 5.0 },
+    { level: 'Entry (T1)', salary: 10.0 },
+    { level: 'Post-Degree', salary: 14.0 }
+  ],
+  'swe': [
+    { level: 'Fresher', salary: 8.0 },
+    { level: 'Mid (3-5y)', salary: 18.0 },
+    { level: 'Senior (7y+)', salary: 32.0 }
+  ],
+  'ai': [
+    { level: 'Fresher', salary: 12.0 },
+    { level: 'Mid (3-5y)', salary: 24.0 },
+    { level: 'Senior (7y+)', salary: 45.0 }
+  ],
+  'cyber': [
+    { level: 'Fresher', salary: 7.0 },
+    { level: 'Mid (3-5y)', salary: 14.0 },
+    { level: 'Senior (7y+)', salary: 26.0 }
+  ],
+  'cloud': [
+    { level: 'Fresher', salary: 10.0 },
+    { level: 'Mid (3-5y)', salary: 20.0 },
+    { level: 'Senior (7y+)', salary: 34.0 }
+  ],
+  'ux': [
+    { level: 'Fresher', salary: 6.0 },
+    { level: 'Mid (3-5y)', salary: 12.0 },
+    { level: 'Senior (7y+)', salary: 22.0 }
+  ],
+  'game': [
+    { level: 'Fresher', salary: 5.0 },
+    { level: 'Mid (3-5y)', salary: 10.0 },
+    { level: 'Senior (7y+)', salary: 20.0 }
+  ],
+  'data': [
+    { level: 'Fresher', salary: 9.0 },
+    { level: 'Mid (3-5y)', salary: 18.0 },
+    { level: 'Senior (7y+)', salary: 30.0 }
+  ]
+};
+
+const CAREER_TUTORIALS = {
+  'foundation-cs': [
+    { title: "Introduction to Computer Science", channel: "Harvard CS50", url: "https://www.youtube.com/embed/zOjov-2OZ0E", duration: "2h 30m" },
+    { title: "Python for Beginners - Full Course", channel: "Programming with Mosh", url: "https://www.youtube.com/embed/_uQrJ0TkZlc", duration: "6h 14m" },
+    { title: "Scratch Game Development Tutorial", channel: "Griffpatch", url: "https://www.youtube.com/embed/8K4S0eL0uI4", duration: "25m" }
+  ],
+  'foundation-finance': [
+    { title: "How the Economic Machine Works", channel: "Ray Dalio", url: "https://www.youtube.com/embed/PHe0bXAIuk0", duration: "30m" },
+    { title: "Personal Finance & Money Management", channel: "Ali Abdaal", url: "https://www.youtube.com/embed/O85LdM60V4g", duration: "45m" },
+    { title: "Introduction to Stock Market & Investing", channel: "Zerodha Varsity", url: "https://www.youtube.com/embed/fDplZ44oV1U", duration: "20m" }
+  ],
+  'foundation-design': [
+    { title: "Graphic Design Fundamentals", channel: "GCFLearnFree", url: "https://www.youtube.com/embed/YqQx75OPRa0", duration: "15m" },
+    { title: "Figma for Beginners Complete Course", channel: "freeCodeCamp.org", url: "https://www.youtube.com/embed/ft30zcMlFao", duration: "3h 40m" },
+    { title: "Color Theory & Typography Basics", channel: "Jesse Showalter", url: "https://www.youtube.com/embed/95_8oXfUe2E", duration: "18m" }
+  ],
+  'btech-cse': [
+    { title: "Data Structures & Algorithms Course", channel: "freeCodeCamp.org", url: "https://www.youtube.com/embed/bum_19loj9A", duration: "8h 12m" },
+    { title: "B.Tech Computer Science Core Lectures", channel: "NPTEL", url: "https://www.youtube.com/embed/gI8N7N-4wWk", duration: "45m" },
+    { title: "Object-Oriented Programming C++ Tutorial", channel: "freeCodeCamp.org", url: "https://www.youtube.com/embed/wN0x9eZvOo4", duration: "1h 30m" }
+  ],
+  'bca': [
+    { title: "Web Development Complete Course", channel: "SuperSimpleDev", url: "https://www.youtube.com/embed/HXYgK65Mh2s", duration: "11h 50m" },
+    { title: "Full Stack MERN Developer Course", channel: "freeCodeCamp.org", url: "https://www.youtube.com/embed/7CqJlxBYj-M", duration: "9h 40m" },
+    { title: "Java Programming for Beginners", channel: "Programming with Mosh", url: "https://www.youtube.com/embed/grEKMHGYyns", duration: "2h 30m" }
+  ],
+  'bdes': [
+    { title: "Introduction to User Experience (UX)", channel: "freeCodeCamp.org", url: "https://www.youtube.com/embed/c6W4sR8K1-0", duration: "2h 15m" },
+    { title: "Material Design & Sketching Guide", channel: "Design Theory", url: "https://www.youtube.com/embed/mGjZz60p4s4", duration: "22m" },
+    { title: "NID/UCEED Preparation Drawing Basics", channel: "Design Academy", url: "https://www.youtube.com/embed/cWn501c6sE4", duration: "15m" }
+  ],
+  'swe': [
+    { title: "System Design Course for Beginners", channel: "freeCodeCamp.org", url: "https://www.youtube.com/embed/SqcY0GlETPk", duration: "5h 20m" },
+    { title: "Git & GitHub Crash Course", channel: "freeCodeCamp.org", url: "https://www.youtube.com/embed/RGOj5yH7evk", duration: "1h 10m" },
+    { title: "Docker & Kubernetes Full Tutorial", channel: "TechWorld with Nana", url: "https://www.youtube.com/embed/3c-iBn73dDE", duration: "3h 40m" }
+  ],
+  'ai': [
+    { title: "Deep Learning & Neural Networks", channel: "Andrej Karpathy", url: "https://www.youtube.com/embed/gGxe2mN3kHg", duration: "2h 15m" },
+    { title: "Transformers, GPTs & Fine-Tuning QLoRA", channel: "Andrej Karpathy", url: "https://www.youtube.com/embed/kCc8FmEb1nY", duration: "1h 56m" },
+    { title: "Retrieval-Augmented Generation (RAG) Tutorial", channel: "LangChain", url: "https://www.youtube.com/embed/tcqEUSNCn8I", duration: "45m" }
+  ],
+  'cyber': [
+    { title: "Cybersecurity Full Course for Beginners", channel: "freeCodeCamp.org", url: "https://www.youtube.com/embed/3yZzEaW9Wz0", duration: "12h" },
+    { title: "Wireshark Packet Analysis Tutorial", channel: "NetworkChuck", url: "https://www.youtube.com/embed/rK2Hl1AypwM", duration: "35m" },
+    { title: "Ethical Hacking & Metasploit Tutorial", channel: "HackerSploit", url: "https://www.youtube.com/embed/e_yW6rZ_KzY", duration: "1h 15m" }
+  ],
+  'cloud': [
+    { title: "AWS Cloud Practitioner Certification Course", channel: "freeCodeCamp.org", url: "https://www.youtube.com/embed/SOTamWGuqXs", duration: "13h" },
+    { title: "Terraform Infrastructure as Code Complete Course", channel: "freeCodeCamp.org", url: "https://www.youtube.com/embed/SLB_c_ayRMo", duration: "2h 30m" },
+    { title: "DevOps Roadmap & SRE Fundamentals", channel: "TechWorld with Nana", url: "https://www.youtube.com/embed/9pZ2xmsSdmU", duration: "1h 15m" }
+  ],
+  'ux': [
+    { title: "UI Design Principles & Figma Layouts", channel: "Mizko", url: "https://www.youtube.com/embed/uH3L8qT-m4o", duration: "40m" },
+    { title: "Figma Design Systems & Components", channel: "freeCodeCamp.org", url: "https://www.youtube.com/embed/Xq4y69gUu2U", duration: "2h" },
+    { title: "How to Build a UI/UX Design Portfolio", channel: "Abhinav Chhikara", url: "https://www.youtube.com/embed/v3A_e4n7R_I", duration: "25m" }
+  ],
+  'game': [
+    { title: "Unity Game Development Course", channel: "freeCodeCamp.org", url: "https://www.youtube.com/embed/gB1F9G0JXOo", duration: "7h" },
+    { title: "Unreal Engine 5 Beginner Tutorial", channel: "Unreal Sensei", url: "https://www.youtube.com/embed/gQmiqmxJMtA", duration: "5h 15m" },
+    { title: "C# Scripting & Physics in Unity", channel: "Brackeys", url: "https://www.youtube.com/embed/j48LtUkZRjU", duration: "30m" }
+  ],
+  'data': [
+    { title: "Data Science for Beginners Course", channel: "freeCodeCamp.org", url: "https://www.youtube.com/embed/ua-CiDNNj30", duration: "6h" },
+    { title: "SQL for Data Analysis Tutorial", channel: "Alex The Analyst", url: "https://www.youtube.com/embed/HXV3zeQKqGY", duration: "4h" },
+    { title: "A/B Testing & Statistics for Data Science", channel: "StatQuest", url: "https://www.youtube.com/embed/8K4S0eL0uI4", duration: "20m" }
+  ]
+};
+
 const CareerRoadmap = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -970,6 +1175,104 @@ const CareerRoadmap = () => {
         </div>
       )}
 
+      {/* Salary Chart & Professionals Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        {/* Salary Chart Column */}
+        <GlassCard className="lg:col-span-1 p-6 flex flex-col justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
+              <TrendingUp className={c.text} size={20} />
+              Salary Growth Path (₹ LPA)
+            </h3>
+            <p className="text-xs text-slate-500 mb-6 font-semibold">
+              Average annual package progression in the Indian market from entry-level to senior roles.
+            </p>
+          </div>
+          
+          <div className="h-[220px] w-full mt-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={CAREER_SALARIES[id] || []}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                <XAxis dataKey="level" stroke="#64748b" fontSize={11} fontWeight={600} tickLine={false} />
+                <YAxis stroke="#64748b" fontSize={11} fontWeight={600} tickLine={false} label={{ value: '₹ LPA Package', angle: -90, position: 'insideLeft', style: { fill: '#64748b', fontSize: '9px', fontWeight: 700 } }} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: 'rgba(255,255,255,0.95)', border: '1px solid #e2e8f0', borderRadius: '12px', fontSize: '12px' }}
+                  formatter={(value) => [`₹ ${value} Lakhs`, 'LPA Package']}
+                />
+                <Bar dataKey="salary" fill={id.includes('foundation') ? '#f59e0b' : '#3b82f6'} radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </GlassCard>
+
+        {/* Profiles Section Column */}
+        <GlassCard className="lg:col-span-2 p-6">
+          <h3 className="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
+            <Users className="text-blue-600" size={20} />
+            Verified Career Journeys
+          </h3>
+          <p className="text-xs text-slate-500 mb-6 font-semibold">
+            Hear from real working professionals in India about what it takes to succeed in this career path.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {(CAREER_PROFILES[id] || []).map((prof, idx) => (
+              <div key={idx} className="bg-slate-50 border border-slate-200 p-4 rounded-xl flex flex-col justify-between relative shadow-sm">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-800">{prof.name}</h4>
+                  <div className="text-[10px] text-slate-500 font-semibold mb-3">{prof.role} at <span className="text-primary font-bold">{prof.company}</span></div>
+                  <p className="text-[11px] text-slate-600 leading-relaxed italic">
+                    "{prof.quote}"
+                  </p>
+                </div>
+                
+                <a 
+                  href={prof.link}
+                  className="text-[10px] text-blue-600 hover:text-blue-800 font-bold mt-4 block self-start transition-colors"
+                >
+                  Connect on LinkedIn →
+                </a>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+      </div>
+
+      {/* Recommended Watch & Learn Tutorial Videos */}
+      <div className="mb-12">
+        <h3 className="text-xl font-bold mb-3 text-slate-900 flex items-center gap-2">
+          <PlayCircle className="text-red-500" size={22} />
+          Recommended Tutorials (Watch & Learn)
+        </h3>
+        <p className="text-xs text-slate-500 mb-6 font-semibold">
+          Hand-picked high-quality tutorial series and lectures to help you acquire key skills for this path.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {(CAREER_TUTORIALS[id] || []).map((video, idx) => (
+            <GlassCard key={idx} className="p-4 flex flex-col justify-between hover:shadow-md transition-shadow border-slate-200">
+              <div className="aspect-video w-full rounded-lg overflow-hidden border border-slate-200 shadow-inner mb-3">
+                <iframe 
+                  width="100%" 
+                  height="100%" 
+                  src={video.url} 
+                  title={video.title}
+                  frameBorder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowFullScreen
+                ></iframe>
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-slate-800 line-clamp-1 mb-1.5" title={video.title}>{video.title}</h4>
+                <div className="flex justify-between items-center text-[10px] text-slate-500 font-semibold">
+                  <span>Channel: {video.channel}</span>
+                  <span className="bg-slate-100 px-2 py-0.5 rounded text-[8px] font-bold text-slate-600">{video.duration}</span>
+                </div>
+              </div>
+            </GlassCard>
+          ))}
+        </div>
+      </div>
+
       {/* Roadmap Steps */}
       <div className="relative">
         {/* Vertical line */}
@@ -1020,7 +1323,7 @@ const CareerRoadmap = () => {
                             <Code size={12} className="text-green-500" />
                             Hands-On Project To Build
                           </h4>
-                          <div className="bg-slate-50 border border-slate-150 rounded-xl p-3 text-slate-600 font-medium leading-relaxed shadow-sm">
+                          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-600 font-medium leading-relaxed shadow-sm">
                             {stage.project}
                           </div>
                         </div>

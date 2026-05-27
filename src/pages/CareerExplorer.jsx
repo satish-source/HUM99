@@ -1,13 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GlassCard from '../components/GlassCard';
 import StatBadge from '../components/StatBadge';
 import AnimatedSection from '../components/AnimatedSection';
 import { 
   Search, Filter, ArrowRight, Brain, Code, Shield, Cloud, Palette, Gamepad2, Database,
-  UploadCloud, X, Sparkles, Loader2, BookOpen, GraduationCap, Cpu, Landmark, Brush, Monitor, Smartphone, Lock, Star 
+  UploadCloud, X, Sparkles, Loader2, BookOpen, GraduationCap, Cpu, Landmark, Brush, Monitor, Smartphone, Lock, Star, CheckCircle2,
+  FileText, File, CheckCircle, AlertCircle, Clipboard
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Configure PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 const careers = [
   // Class 10 Foundational Skills
@@ -38,9 +43,9 @@ const getCareerIcon = (id) => {
     
     case 'btech-cse': return <Monitor className="text-blue-600" size={24} />;
     case 'bca': return <Smartphone className="text-sky-500" size={24} />;
-    case 'bdes': return <Palette className="text-pink-650" size={24} />;
+    case 'bdes': return <Palette className="text-pink-600" size={24} />;
     
-    case 'swe': return <Code className="text-blue-650" size={24} />;
+    case 'swe': return <Code className="text-blue-600" size={24} />;
     case 'ai': return <Brain className="text-violet-600" size={24} />;
     case 'cyber': return <Shield className="text-red-500" size={24} />;
     case 'cloud': return <Cloud className="text-sky-500" size={24} />;
@@ -50,6 +55,109 @@ const getCareerIcon = (id) => {
     default: return <Sparkles className="text-blue-500" size={24} />;
   }
 };
+
+const QUIZ_QUESTIONS = [
+  {
+    id: 1,
+    question: "1. Which subject or topic do you enjoy learning about the most?",
+    options: [
+      { text: "Math, logic puzzles, or computer algorithms", value: "logic" },
+      { text: "Science, human biology, or chemistry", value: "science" },
+      { text: "Drawing, visual arts, typography, or UI screens", value: "design" },
+      { text: "Business, finance, investments, or writing", value: "business" }
+    ]
+  },
+  {
+    id: 2,
+    question: "2. How would you describe your ideal daily task style?",
+    options: [
+      { text: "Writing code, configuring tools, and solving bugs", value: "coding" },
+      { text: "Analyzing numbers, finding trends, and training data models", value: "data" },
+      { text: "Designing layouts, matching colors, and creating graphics", value: "visuals" },
+      { text: "Creating business strategies, tracking budgets, or networking", value: "finance" }
+    ]
+  },
+  {
+    id: 3,
+    question: "3. What type of work environment excites you most?",
+    options: [
+      { text: "Fast-paced tech startup or software house", value: "tech" },
+      { text: "A creative studio, design agency, or game house", value: "creative" },
+      { text: "Corporate office, bank, or consulting firm", value: "corporate" },
+      { text: "School, local coaching centre, or research lab", value: "academic" }
+    ]
+  },
+  {
+    id: 4,
+    question: "4. When faced with a problem, what is your first instinct?",
+    options: [
+      { text: "Build a technical solution, script, or utility", value: "build" },
+      { text: "Look at the numbers, calculate averages, and find correlations", value: "analyze" },
+      { text: "Sketch out the user interface or sketch a diagram", value: "sketch" },
+      { text: "Structure a plan, allocate budget, or talk to people", value: "plan" }
+    ]
+  },
+  {
+    id: 5,
+    question: "5. What is your priority when looking at future careers?",
+    options: [
+      { text: "Maximizing salary and unlocking high-paying packages", value: "salary" },
+      { text: "Low stress, good work-life balance, and low pressure", value: "balance" },
+      { text: "Future-proof roles with very low automation/AI replacement risk", value: "security" },
+      { text: "High creativity, passion projects, and self-expression", value: "creative" }
+    ]
+  },
+  {
+    id: 6,
+    question: "6. How do you feel about coding and advanced mathematics?",
+    options: [
+      { text: "I love it! I want to write code or do data math all day", value: "love" },
+      { text: "I like coding as a tool, but I prefer the visual design aspect", value: "visual-first" },
+      { text: "I prefer business analysis, finances, and compound interest calculations", value: "finance-first" },
+      { text: "I am not fond of coding; I prefer creative or human-centric roles", value: "non-tech" }
+    ]
+  },
+  {
+    id: 7,
+    question: "7. What is your perspective on Artificial Intelligence (AI)?",
+    options: [
+      { text: "I want to build neural networks, train LLMs, and develop AI models", value: "build-ai" },
+      { text: "I want to deploy AI securely or use cloud servers to run them", value: "cloud-ai" },
+      { text: "I want to design the visual prompts and interfaces for AI tools", value: "design-ai" },
+      { text: "I want to understand AI trends but focus on business/finance", value: "business-ai" }
+    ]
+  },
+  {
+    id: 8,
+    question: "8. How long are you willing to study or prepare for your career?",
+    options: [
+      { text: "4 years for a comprehensive engineering degree (B.Tech)", value: "btech" },
+      { text: "3 years for a practical applications degree (BCA)", value: "bca" },
+      { text: "4 years for a visual arts and design specialty (B.Des)", value: "bdes" },
+      { text: "Short-term certifications and jump straight into coding", value: "cert" }
+    ]
+  },
+  {
+    id: 9,
+    question: "9. If you were starting a personal project, what would it be?",
+    options: [
+      { text: "Developing a 3D multiplayer game or web application", value: "game-web" },
+      { text: "Creating a budget tracker or investing in dummy stocks", value: "finance-app" },
+      { text: "Publishing a graphic novel, Figma portfolio, or branding template", value: "graphics" },
+      { text: "Configuring a local server network or security firewall", value: "infrastructure" }
+    ]
+  },
+  {
+    id: 10,
+    question: "10. What is your primary communication style?",
+    options: [
+      { text: "Writing clear technical specs or scripting logic", value: "technical" },
+      { text: "Creating visual diagrams, prototypes, and slides", value: "visual" },
+      { text: "Presenting numbers, charts, and financial reports", value: "analytical" },
+      { text: "Collaborating with clients, mentoring, and direct talking", value: "verbal" }
+    ]
+  }
+];
 
 const CareerExplorer = () => {
   const navigate = useNavigate();
@@ -66,6 +174,28 @@ const CareerExplorer = () => {
   const [matchingLoading, setMatchingLoading] = useState(false);
   const [resumeMatchScores, setResumeMatchScores] = useState(null);
   const [missingSkills, setMissingSkills] = useState(null);
+  const [resumeTab, setResumeTab] = useState('upload'); // 'upload' | 'paste'
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [fileParseLoading, setFileParseLoading] = useState(false);
+  const [fileParseError, setFileParseError] = useState(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const fileInputRef = useRef(null);
+
+  // AI Career Match Quiz State
+  const [showCareerQuizModal, setShowCareerQuizModal] = useState(false);
+  const [currentQuizQuestionIndex, setCurrentQuizQuestionIndex] = useState(0);
+  const [quizAnswers, setQuizAnswers] = useState(Array(10).fill(''));
+  const [quizLoading, setQuizLoading] = useState(false);
+  const [quizMatchScores, setQuizMatchScores] = useState(null);
+  const [quizTopCareerId, setQuizTopCareerId] = useState(null);
+  const [quizExplanation, setQuizExplanation] = useState(null);
+
+  useEffect(() => {
+    const quizParam = searchParams.get('quiz');
+    if (quizParam === 'true') {
+      setShowCareerQuizModal(true);
+    }
+  }, [searchParams]);
 
   // User Profile for Personalization
   const [profile, setProfile] = useState(null);
@@ -146,6 +276,87 @@ const CareerExplorer = () => {
     return matchesSearch && matchesCategory && matchesStage && matchesStream;
   });
 
+  const hasMatchScore = !!resumeMatchScores || !!quizMatchScores;
+  
+  const displayedCareers = hasMatchScore
+    ? [...filteredCareers].sort((a, b) => {
+        const scoreA = resumeMatchScores ? (resumeMatchScores[a.id] || 0) : (quizMatchScores ? (quizMatchScores[a.id] || 0) : 0);
+        const scoreB = resumeMatchScores ? (resumeMatchScores[b.id] || 0) : (quizMatchScores ? (quizMatchScores[b.id] || 0) : 0);
+        return scoreB - scoreA;
+      })
+    : filteredCareers;
+
+  // Extract text from a PDF file using pdfjs-dist
+  const extractPdfText = async (file) => {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items.map(item => item.str).join(' ');
+      fullText += pageText + '\n';
+    }
+    return fullText.trim();
+  };
+
+  const processFile = useCallback(async (file) => {
+    if (!file) return;
+    const validTypes = ['application/pdf', 'text/plain'];
+    const validExts = ['.pdf', '.txt'];
+    const ext = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+    if (!validTypes.includes(file.type) && !validExts.includes(ext)) {
+      setFileParseError('Unsupported file type. Please upload a PDF or TXT file.');
+      return;
+    }
+    setFileParseLoading(true);
+    setFileParseError(null);
+    setUploadedFile(file);
+    try {
+      let text = '';
+      if (file.type === 'application/pdf' || ext === '.pdf') {
+        text = await extractPdfText(file);
+      } else {
+        // Plain text file
+        text = await file.text();
+      }
+      if (!text.trim()) {
+        throw new Error('Could not extract text from this file. Try copying and pasting your resume text instead.');
+      }
+      setResumeText(text);
+    } catch (err) {
+      setFileParseError(err.message || 'Failed to parse file.');
+      setUploadedFile(null);
+    } finally {
+      setFileParseLoading(false);
+    }
+  }, []);
+
+  const handleFileInputChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = () => setIsDragOver(false);
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) processFile(file);
+  };
+
+  const handleModalClose = () => {
+    setShowModal(false);
+    setFileParseError(null);
+    setUploadedFile(null);
+  };
+
   const handleScanResume = async (e) => {
     e.preventDefault();
     if (!resumeText.trim() || matchingLoading) return;
@@ -184,57 +395,183 @@ const CareerExplorer = () => {
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-md p-4"
+            onClick={(e) => { if (e.target === e.currentTarget) handleModalClose(); }}
           >
             <motion.div 
-              initial={{ scale: 0.95, y: 15 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 15 }}
-              className="bg-white border border-slate-200 rounded-2xl p-8 max-w-lg w-full relative shadow-2xl"
+              initial={{ scale: 0.92, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.92, y: 20, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+              className="bg-white border border-slate-200 rounded-3xl max-w-xl w-full relative shadow-2xl overflow-hidden"
             >
-              <button 
-                onClick={() => setShowModal(false)}
-                className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-colors"
-              >
-                <X size={24} />
-              </button>
-              
-              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-slate-800">
-                <Sparkles className="text-blue-600" size={24} />
-                Scan Resume with AI
-              </h2>
-              <p className="text-sm text-slate-500 mb-6">
-                Paste your resume text or experience details. Our AI will analyze your skill profile against all career paths to calculate your match compatibility.
-              </p>
-              
-              <form onSubmit={handleScanResume} className="flex flex-col gap-4">
-                <textarea
-                  rows={8}
-                  placeholder="Paste your skills, experience history, or full resume text here..."
-                  value={resumeText}
-                  onChange={(e) => setResumeText(e.target.value)}
-                  required
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-slate-800 text-sm focus:outline-none focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)] transition-all resize-none"
-                />
-                
-                <button
-                  type="submit"
-                  disabled={matchingLoading || !resumeText.trim()}
-                  className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white relative overflow-hidden">
+                <div className="absolute -top-6 -right-6 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+                <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white/10 rounded-full blur-xl" />
+                <button 
+                  onClick={handleModalClose}
+                  className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors bg-white/10 rounded-full p-1.5"
                 >
-                  {matchingLoading ? (
-                    <>
-                      <Loader2 size={18} className="animate-spin" />
-                      Analyzing Resume...
-                    </>
-                  ) : (
-                    <>
-                      <UploadCloud size={18} />
-                      Calculate Match Scores
-                    </>
-                  )}
+                  <X size={18} />
                 </button>
-              </form>
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="bg-white/20 p-2 rounded-xl">
+                    <Sparkles size={20} />
+                  </div>
+                  <h2 className="text-xl font-bold">AI Resume Scanner</h2>
+                </div>
+                <p className="text-sm text-blue-100">
+                  Upload your resume to instantly match your skills against all career paths.
+                </p>
+              </div>
+
+              {/* Tabs */}
+              <div className="flex border-b border-slate-100 bg-slate-50">
+                <button
+                  onClick={() => setResumeTab('upload')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-semibold transition-all ${
+                    resumeTab === 'upload'
+                      ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  <UploadCloud size={15} />
+                  Upload File
+                </button>
+                <button
+                  onClick={() => setResumeTab('paste')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-semibold transition-all ${
+                    resumeTab === 'paste'
+                      ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  <Clipboard size={15} />
+                  Paste Text
+                </button>
+              </div>
+
+              <div className="p-6">
+                {resumeTab === 'upload' ? (
+                  <div className="flex flex-col gap-4">
+                    {/* Drop Zone */}
+                    <div
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                      className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${
+                        isDragOver
+                          ? 'border-blue-500 bg-blue-50 scale-[1.01]'
+                          : uploadedFile
+                          ? 'border-green-400 bg-green-50'
+                          : 'border-slate-200 bg-slate-50 hover:border-blue-400 hover:bg-blue-50/40'
+                      }`}
+                    >
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".pdf,.txt"
+                        className="hidden"
+                        onChange={handleFileInputChange}
+                      />
+                      {fileParseLoading ? (
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center">
+                            <Loader2 size={24} className="text-blue-600 animate-spin" />
+                          </div>
+                          <p className="text-sm font-semibold text-blue-700">Reading your resume...</p>
+                          <p className="text-xs text-slate-400">Extracting text from PDF</p>
+                        </div>
+                      ) : uploadedFile ? (
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center">
+                            <CheckCircle size={24} className="text-green-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-green-700">{uploadedFile.name}</p>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              {resumeText.length > 0 ? `${resumeText.length.toLocaleString()} characters extracted` : 'Processing...'}
+                            </p>
+                          </div>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setUploadedFile(null); setResumeText(''); setFileParseError(null); }}
+                            className="text-xs text-slate-400 hover:text-red-500 transition-colors flex items-center gap-1"
+                          >
+                            <X size={12} /> Remove file
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center">
+                            <FileText size={28} className="text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-700">Drop your resume here</p>
+                            <p className="text-xs text-slate-400 mt-0.5">or click to browse files</p>
+                          </div>
+                          <div className="flex gap-2 mt-1">
+                            <span className="text-xs bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full font-medium">PDF</span>
+                            <span className="text-xs bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full font-medium">TXT</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Error display */}
+                    {fileParseError && (
+                      <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl p-3">
+                        <AlertCircle size={15} className="text-red-500 mt-0.5 flex-shrink-0" />
+                        <p className="text-xs text-red-600">{fileParseError}</p>
+                      </div>
+                    )}
+
+                    {/* Extracted text preview */}
+                    {resumeText && uploadedFile && (
+                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 max-h-28 overflow-y-auto">
+                        <p className="text-xs text-slate-400 font-semibold mb-1 uppercase tracking-wide">Extracted Preview</p>
+                        <p className="text-xs text-slate-600 leading-relaxed line-clamp-4">{resumeText.slice(0, 400)}...</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    <textarea
+                      rows={8}
+                      placeholder="Paste your skills, experience history, or full resume text here..."
+                      value={resumeText}
+                      onChange={(e) => setResumeText(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-slate-800 text-sm focus:outline-none focus:border-blue-400 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)] transition-all resize-none"
+                    />
+                  </div>
+                )}
+
+                <form onSubmit={handleScanResume} className="mt-4">
+                  <button
+                    type="submit"
+                    disabled={matchingLoading || !resumeText.trim()}
+                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+                  >
+                    {matchingLoading ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Analyzing your resume...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles size={18} />
+                        Calculate Career Match Scores
+                      </>
+                    )}
+                  </button>
+                  {!resumeText.trim() && (
+                    <p className="text-center text-xs text-slate-400 mt-2">
+                      {resumeTab === 'upload' ? 'Upload a resume file to continue' : 'Paste your resume text to continue'}
+                    </p>
+                  )}
+                </form>
+              </div>
             </motion.div>
           </motion.div>
         )}
@@ -304,7 +641,7 @@ const CareerExplorer = () => {
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border shrink-0 ${
                   selectedCategory === cat 
-                    ? 'bg-violet-100 border-violet-400 text-violet-850 shadow-sm' 
+                    ? 'bg-violet-100 border-violet-400 text-violet-800 shadow-sm' 
                     : 'bg-white border-slate-200 text-slate-500 hover:text-slate-800'
                 }`}
               >
@@ -346,7 +683,7 @@ const CareerExplorer = () => {
                 onClick={() => setSelectedStreamFilter(str)}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border shrink-0 ${
                   selectedStreamFilter === str 
-                    ? 'bg-indigo-100 border-indigo-400 text-indigo-850 shadow-sm' 
+                    ? 'bg-indigo-100 border-indigo-400 text-indigo-800 shadow-sm' 
                     : 'bg-white border-slate-200 text-slate-500 hover:text-slate-800'
                 }`}
               >
@@ -359,8 +696,10 @@ const CareerExplorer = () => {
 
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredCareers.map((career, i) => {
-          const matchScore = resumeMatchScores ? resumeMatchScores[career.id] : null;
+        {displayedCareers.map((career, i) => {
+          const matchScore = resumeMatchScores 
+            ? resumeMatchScores[career.id] 
+            : (quizMatchScores ? quizMatchScores[career.id] : null);
           const isCompatible = !profile?.stream || profile.stream === 'All' || career.stream === profile.stream;
           const isSaved = profile?.savedCareers?.some(c => c.title === career.title);
           
@@ -427,7 +766,7 @@ const CareerExplorer = () => {
                     disabled={isSaved}
                     className={`text-xs font-bold px-3.5 py-2.5 rounded-xl transition-all flex items-center gap-1 cursor-pointer active:scale-95 shadow-sm ${
                       isSaved 
-                        ? 'bg-slate-100 text-slate-400 border border-slate-150 cursor-not-allowed' 
+                        ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed' 
                         : 'bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 text-slate-600 hover:text-indigo-600'
                     }`}
                   >
@@ -435,7 +774,7 @@ const CareerExplorer = () => {
                     {isSaved ? 'Saved' : 'Save Path'}
                   </button>
                   
-                  <span className="text-xs text-blue-650 hover:text-blue-800 font-bold flex items-center gap-1 group-hover:translate-x-1 duration-200">
+                  <span className="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 group-hover:translate-x-1 duration-200">
                     View Roadmap <ArrowRight size={14} />
                   </span>
                 </div>
@@ -450,6 +789,183 @@ const CareerExplorer = () => {
           No courses or careers found matching your criteria.
         </div>
       )}
+
+      {/* AI Career Match Quiz Modal */}
+      <AnimatePresence>
+        {showCareerQuizModal && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              className="bg-white border border-slate-200 rounded-2xl p-8 max-w-xl w-full relative shadow-2xl"
+            >
+              <button 
+                onClick={() => setShowCareerQuizModal(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-colors"
+              >
+                <X size={24} />
+              </button>
+              
+              <h2 className="text-2xl font-bold mb-2 flex items-center gap-2 text-slate-800">
+                <Sparkles className="text-blue-600" size={24} />
+                AI Career Match Quiz
+              </h2>
+              
+              {!quizExplanation ? (
+                <>
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-xs font-bold text-blue-600 uppercase font-semibold">Question {currentQuizQuestionIndex + 1} of 10</span>
+                    <span className="text-xs text-slate-400 font-bold">{Math.round(((currentQuizQuestionIndex + 1) / 10) * 100)}% Complete</span>
+                  </div>
+                  
+                  {/* Progress bar */}
+                  <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-6">
+                    <div 
+                      className="h-full bg-blue-600 transition-all duration-300"
+                      style={{ width: `${((currentQuizQuestionIndex + 1) / 10) * 100}%` }}
+                    />
+                  </div>
+
+                  <h3 className="text-lg font-bold text-slate-800 mb-6 min-h-[50px]">
+                    {QUIZ_QUESTIONS[currentQuizQuestionIndex].question}
+                  </h3>
+
+                  <div className="flex flex-col gap-3 mb-8">
+                    {QUIZ_QUESTIONS[currentQuizQuestionIndex].options.map((option, idx) => {
+                      const isSelected = quizAnswers[currentQuizQuestionIndex] === option.text;
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            const updated = [...quizAnswers];
+                            updated[currentQuizQuestionIndex] = option.text;
+                            setQuizAnswers(updated);
+                          }}
+                          className={`w-full py-3.5 px-5 rounded-xl border text-left text-sm font-semibold transition-all ${
+                            isSelected 
+                              ? 'border-blue-500 bg-blue-50/50 text-blue-800 shadow-sm' 
+                              : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+                          }`}
+                        >
+                          {option.text}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="flex justify-between items-center pt-4 border-t border-slate-200">
+                    <button
+                      disabled={currentQuizQuestionIndex === 0}
+                      onClick={() => setCurrentQuizQuestionIndex(prev => prev - 1)}
+                      className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-500 font-bold text-xs rounded-xl transition-all disabled:opacity-30"
+                    >
+                      Back
+                    </button>
+                    
+                    {currentQuizQuestionIndex < 9 ? (
+                      <button
+                        disabled={!quizAnswers[currentQuizQuestionIndex]}
+                        onClick={() => setCurrentQuizQuestionIndex(prev => prev + 1)}
+                        className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition-all"
+                      >
+                        Next Question
+                      </button>
+                    ) : (
+                      <button
+                        disabled={!quizAnswers[currentQuizQuestionIndex] || quizLoading}
+                        onClick={async () => {
+                          setQuizLoading(true);
+                          try {
+                            const apiBaseUrl = import.meta.env.VITE_API_URL || '';
+                            const response = await fetch(`${apiBaseUrl}/api/quiz/career-match`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ answers: quizAnswers })
+                            });
+                            if (response.ok) {
+                              const data = await response.json();
+                              setQuizMatchScores(data.scores);
+                              setQuizTopCareerId(data.topCareerId);
+                              setQuizExplanation(data.explanation);
+                            } else {
+                              alert('Failed to calculate matches. Make sure the backend is running.');
+                            }
+                          } catch (err) {
+                            console.error(err);
+                            alert('Network error. Check backend server.');
+                          } finally {
+                            setQuizLoading(false);
+                          }
+                        }}
+                        className="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5"
+                      >
+                        {quizLoading ? (
+                          <>
+                            <Loader2 size={14} className="animate-spin" />
+                            Calculating...
+                          </>
+                        ) : (
+                          <>
+                            Submit Quiz 🎉
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-4">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle2 className="w-10 h-10 text-green-500 animate-bounce" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-800 mb-2">Quiz Completed!</h3>
+                  
+                  {/* Explanation card */}
+                  <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 text-left my-6 shadow-inner">
+                    <h4 className="font-bold text-slate-900 mb-1 flex items-center gap-1.5 text-sm">
+                      <Sparkles size={16} className="text-blue-600" />
+                      Top Recommended Fit: {careers.find(c => c.id === quizTopCareerId)?.title || quizTopCareerId}
+                    </h4>
+                    <p className="text-xs text-slate-600 leading-relaxed font-semibold mt-2">
+                      {quizExplanation}
+                    </p>
+                  </div>
+
+                  <p className="text-xs text-slate-500 mb-6 font-semibold">
+                    We have updated the Career Explorer cards with your personality match scores. The best matches are now highlighted!
+                  </p>
+
+                  <div className="flex gap-4 justify-center">
+                    <button
+                      onClick={() => setShowCareerQuizModal(false)}
+                      className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md"
+                    >
+                      Browse My Matches
+                    </button>
+                    <button
+                      onClick={() => {
+                        setQuizAnswers(Array(10).fill(''));
+                        setCurrentQuizQuestionIndex(0);
+                        setQuizExplanation(null);
+                        setQuizMatchScores(null);
+                      }}
+                      className="px-5 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold rounded-xl text-xs"
+                    >
+                      Retake Quiz
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

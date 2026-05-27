@@ -5,7 +5,7 @@ import StatBadge from '../components/StatBadge';
 import AnimatedSection from '../components/AnimatedSection';
 import { 
   User, Zap, Star, Shield, Play, Flame, Edit2, X, UploadCloud, 
-  Compass, BookOpen, Award, BarChart2, FileText, CheckCircle, Users, MessageSquare, Lock 
+  Compass, BookOpen, Award, BarChart2, FileText, CheckCircle, Users, MessageSquare, Lock, ArrowRight 
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -34,30 +34,55 @@ const UserDashboard = () => {
     level: 1,
     streak: 0,
     savedCareers: [],
-    unlockedBadges: []
+    unlockedBadges: [],
+    grade: "",
+    stream: "",
+    goal: ""
   });
 
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState(userProfile);
 
-  // Fetch profile from backend MongoDB
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const apiBaseUrl = import.meta.env.VITE_API_URL || '';
-        const response = await fetch(`${apiBaseUrl}/api/profile`);
-        if (response.ok) {
-          const data = await response.json();
-          setUserProfile(data);
-          setEditForm(data);
-        }
-      } catch (err) {
-        console.error('Error fetching profile:', err);
-      } finally {
-        setLoading(false);
+  // Fetch profile from backend MongoDB with retry for Render cold-starts
+  const fetchProfile = async (retryCount = 0) => {
+    try {
+      setFetchError(null);
+      setLoading(true);
+      const apiBaseUrl = import.meta.env.VITE_API_URL || '';
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+      
+      const response = await fetch(`${apiBaseUrl}/api/profile`, {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setUserProfile(data);
+        setEditForm(data);
+      } else {
+        throw new Error(`Server returned ${response.status}`);
       }
-    };
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+      if (retryCount < 2) {
+        // Retry once for Render cold-start (free tier spins down after inactivity)
+        setTimeout(() => fetchProfile(retryCount + 1), 3000);
+        return;
+      }
+      setFetchError(err.name === 'AbortError' 
+        ? 'Backend is taking too long to respond. It may be waking up from sleep (Render free tier).'
+        : 'Could not connect to backend. Please check your deployment.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchProfile();
   }, []);
 
@@ -244,6 +269,20 @@ const UserDashboard = () => {
                     </>
                   )}
                 </div>
+                <div>
+                  <label className="block text-sm text-slate-500 mb-2">Primary Goal</label>
+                  <select 
+                    value={editForm.goal || ''}
+                    onChange={(e) => setEditForm({...editForm, goal: e.target.value})}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-slate-800 focus:outline-none focus:border-primary font-medium"
+                  >
+                    <option value="">Select Goal</option>
+                    <option value="Choose Stream">Choose Stream</option>
+                    <option value="Choose College">Choose College</option>
+                    <option value="Choose Career">Choose Career</option>
+                    <option value="Get a Job">Get a Job</option>
+                  </select>
+                </div>
                 
                 <button 
                   onClick={saveProfile}
@@ -308,6 +347,11 @@ const UserDashboard = () => {
             <p className="text-slate-500 text-sm mb-4">
               Stage: <strong className="text-slate-700">{userProfile.grade}</strong> • 
               Stream: <strong className="text-slate-700">{userProfile.stream === 'All' ? 'All / Deciding' : userProfile.stream}</strong>
+              {userProfile.goal && (
+                <>
+                  {' • Goal: '}<strong className="text-slate-700">{userProfile.goal}</strong>
+                </>
+              )}
             </p>
           )}
           
@@ -414,7 +458,7 @@ const UserDashboard = () => {
                   className={`relative rounded-2xl border p-4 flex flex-col items-center text-center transition-all ${
                     isUnlocked 
                       ? 'bg-white border-slate-200 hover:shadow-md hover:-translate-y-0.5' 
-                      : 'bg-slate-50/50 border-slate-150 opacity-40 grayscale'
+                      : 'bg-slate-50/50 border-slate-200 opacity-40 grayscale'
                   }`}
                   title={badge.desc}
                 >

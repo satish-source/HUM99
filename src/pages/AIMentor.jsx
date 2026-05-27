@@ -28,10 +28,11 @@ const CopyButton = ({ code }) => {
 
 // Markdown rendering components — mirrors ChatGPT/Gemini style
 const markdownComponents = {
-  code({ node, inline, className, children, ...props }) {
+  code({ node, className, children, ...props }) {
     const match = /language-(\w+)/.exec(className || '');
     const codeString = String(children).replace(/\n$/, '');
-    if (!inline && match) {
+    const isInline = !match && (!node?.properties?.className);
+    if (!isInline && match) {
       return (
         <div className="relative my-4 rounded-xl overflow-hidden border border-slate-200 shadow-sm">
           <div className="flex items-center justify-between px-4 py-2 bg-slate-100 border-b border-slate-200">
